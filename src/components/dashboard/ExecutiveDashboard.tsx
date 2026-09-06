@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 export const ExecutiveDashboard: React.FC = () => {
-  const { records, setActiveRecordId, setActiveTab } = useLandRecord();
+  const { records, setActiveRecordId, setActiveTab, t } = useLandRecord();
   const [selectedStateCode, setSelectedStateCode] = useState<string>('UP');
 
   const selectedState = STATE_DIGITIZATION_PROGRESS.find(s => s.stateCode === selectedStateCode) || STATE_DIGITIZATION_PROGRESS[0];
@@ -41,13 +41,13 @@ export const ExecutiveDashboard: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold mb-2.5">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              Smart India Hackathon 2024 AI Solution
+              {t('heroBadge')}
             </div>
             <h2 className="text-2xl font-extrabold text-white tracking-tight">
-              Intelligent Land Record Digitization & Validation Command Center
+              {t('heroTitle')}
             </h2>
             <p className="text-slate-300 text-xs mt-1 max-w-2xl leading-relaxed">
-              Automating extraction, layout classification, multilingual Devanagari & Dravidian OCR, automated revenue rule checks, and spatial cadastral linkage compliant with DILRMP standards.
+              {t('heroSubtitle')}
             </p>
           </div>
 
@@ -57,14 +57,14 @@ export const ExecutiveDashboard: React.FC = () => {
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 transition-all transform hover:-translate-y-0.5"
             >
               <ScanLine className="w-4 h-4" />
-              Upload & Digitize Record
+              {t('uploadAndDigitize')}
             </button>
             <button
               onClick={() => setActiveTab('SPLIT_VERIFY')}
               className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all"
             >
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              Launch HITL Verification ({pendingCount})
+              {t('launchHitl')} ({pendingCount})
             </button>
           </div>
         </div>
@@ -75,7 +75,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* Total Processed */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>Monthly Processed</span>
+            <span>{t('kpiMonthly')}</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
               <FileText className="w-4 h-4" />
             </div>
@@ -90,7 +90,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* Mean OCR Accuracy */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>OCR & Parser CRR</span>
+            <span>{t('kpiAccuracy')}</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
               <Sparkles className="w-4 h-4" />
             </div>
@@ -104,7 +104,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* Auto-Validated Pass */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>Auto-Rule Validated</span>
+            <span>{t('kpiAutoRule')}</span>
             <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -118,7 +118,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* Pending Verification */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>Pending Patwari Review</span>
+            <span>{t('kpiPending')}</span>
             <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
               <Clock className="w-4 h-4" />
             </div>
@@ -132,7 +132,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* Disputed / High Risk */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>Discrepancy Flags</span>
+            <span>{t('kpiDisputes')}</span>
             <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-400">
               <AlertOctagon className="w-4 h-4" />
             </div>
@@ -146,7 +146,7 @@ export const ExecutiveDashboard: React.FC = () => {
         {/* SHA-256 Audit Blocks */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>Immutable Blockchain</span>
+            <span>{t('kpiBlockchain')}</span>
             <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400">
               <ShieldCheck className="w-4 h-4" />
             </div>
@@ -166,10 +166,10 @@ export const ExecutiveDashboard: React.FC = () => {
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Map className="w-4 h-4 text-emerald-400" />
-                State-Wise Modernization & Digitization Index (DILRMP)
+                {t('stateProgressTitle')}
               </h3>
               <p className="text-xs text-slate-400">
-                Live cadastral polygon conversion, spatial linking, and bilingual record digitization metrics.
+                {t('stateProgressSubtitle')}
               </p>
             </div>
 
@@ -194,26 +194,26 @@ export const ExecutiveDashboard: React.FC = () => {
           {/* Selected State Spotlight Detail Card */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950/60 rounded-xl p-4 border border-slate-800/80">
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-500 block">Selected Territory</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-500 block">{t('selectedTerritory')}</span>
               <span className="text-base font-bold text-white block">{selectedState.stateName}</span>
               <span className="text-xs text-emerald-400 font-devanagari">{selectedState.vernacularName}</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-500 block">Villages Modernized</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-500 block">{t('villagesModernized')}</span>
               <span className="text-base font-bold text-white font-mono">
                 {selectedState.digitizedVillages.toLocaleString('en-IN')} / {selectedState.totalVillages.toLocaleString('en-IN')}
               </span>
               <span className="text-[11px] text-slate-400">({selectedState.progressPercent}% Completed)</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-500 block">Land Parcels (Khasra)</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-500 block">{t('parcelsMapped')}</span>
               <span className="text-base font-bold text-white font-mono">
                 {(selectedState.digitizedParcelsCount / 1000000).toFixed(1)}M / {(selectedState.totalParcelsCount / 1000000).toFixed(1)}M
               </span>
               <span className="text-[11px] text-teal-400 font-medium">96.4% GIS Vectorized</span>
             </div>
             <div>
-              <span className="text-[10px] uppercase font-semibold text-slate-500 block">AI Accuracy Rate</span>
+              <span className="text-[10px] uppercase font-semibold text-slate-500 block">{t('aiAccuracyRate')}</span>
               <span className="text-base font-bold text-emerald-400 font-mono">{selectedState.accuracyRatePercent}%</span>
               <span className="text-[11px] text-rose-400">{selectedState.activeDisputesCount} Active Disputes</span>
             </div>
@@ -367,10 +367,10 @@ export const ExecutiveDashboard: React.FC = () => {
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Layers className="w-4 h-4 text-emerald-400" />
-              Preloaded Multi-Lingual Sample Records (SIH Live Evaluation)
+              {t('sampleRecordsTitle')}
             </h3>
             <p className="text-xs text-slate-400">
-              Click any sample below to instantly load into the Dual-Pane HITL Verification Studio with interactive bounding boxes and validation rules.
+              {t('sampleRecordsSubtitle')}
             </p>
           </div>
           <span className="text-xs text-slate-400 font-mono">
@@ -421,11 +421,11 @@ export const ExecutiveDashboard: React.FC = () => {
 
                   <div className="mt-3 text-[11px] space-y-1 bg-slate-900/80 p-2 rounded-lg border border-slate-800/80 font-mono">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Khasra / Gat:</span>
+                      <span className="text-slate-400">{t('khasraNoLabel').split('/')[0]}:</span>
                       <span className="text-slate-200 font-bold">{rec.khasraNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Area:</span>
+                      <span className="text-slate-400">{t('plotAreaLabel')}:</span>
                       <span className="text-emerald-400 font-bold">{rec.plotAreaOriginal} {rec.plotAreaUnit}</span>
                     </div>
                     <div className="flex justify-between">
@@ -438,7 +438,7 @@ export const ExecutiveDashboard: React.FC = () => {
                 <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
                   <span className="text-[10px] text-slate-500">{rec.owners.length} Co-Owner(s)</span>
                   <span className="text-emerald-400 font-semibold inline-flex items-center gap-1">
-                    Open Studio <ArrowUpRight className="w-3.5 h-3.5" />
+                    {t('openStudio')} <ArrowUpRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>

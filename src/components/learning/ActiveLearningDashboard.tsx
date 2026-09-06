@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const ActiveLearningDashboard: React.FC = () => {
-  const { activeLearningTokens, modelMetrics, retrainModelBatch } = useLandRecord();
+  const { activeLearningTokens, modelMetrics, retrainModelBatch, t } = useLandRecord();
   const [isRetraining, setIsRetraining] = useState(false);
   const [retrainSuccess, setRetrainSuccess] = useState(false);
 
@@ -50,10 +50,10 @@ export const ActiveLearningDashboard: React.FC = () => {
             Continuous Learning & Human-in-the-Loop Feedback Loop
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight">
-            AI Active Learning & Layout Transformer Model Retraining
+            {t('learningTitle')}
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Every correction performed by revenue officers feeds into a token buffer to continuously retrain the vision transformer on rare regional dialects and degraded calligraphy.
+            {t('learningSubtitle')}
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export const ActiveLearningDashboard: React.FC = () => {
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              Trigger Active Retrain Cycle
+              {t('triggerRetrain')}
             </>
           )}
         </button>
@@ -174,7 +174,7 @@ export const ActiveLearningDashboard: React.FC = () => {
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <Database className="w-4 h-4 text-emerald-400" />
-              Human-in-the-Loop Token Correction Buffer
+              {t('feedbackTokens')}
             </h3>
             <p className="text-xs text-slate-400">
               Tokens transcribed and approved by Patwaris across revenue circles awaiting next fine-tuning epoch.

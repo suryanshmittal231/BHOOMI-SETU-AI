@@ -18,7 +18,7 @@ import {
 import L from 'leaflet';
 
 export const CadastralMapViewer: React.FC = () => {
-  const { records, setActiveRecordId, setActiveTab } = useLandRecord();
+  const { records, setActiveRecordId, setActiveTab, t } = useLandRecord();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const geojsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -156,7 +156,7 @@ export const CadastralMapViewer: React.FC = () => {
             Bhuvan ISRO / DILRMP Spatial Cadastral GIS Engine
           </div>
           <h2 className="text-lg font-bold text-white tracking-tight">
-            Vectorized Khasra Parcel Map & Spatial Boundary Inspector
+            {t('gisTitle')}
           </h2>
         </div>
 
@@ -169,7 +169,7 @@ export const CadastralMapViewer: React.FC = () => {
                 mapMode === 'HYBRID' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Satellite Overlay
+              {t('satelliteOverlay')}
             </button>
             <button
               onClick={() => setMapMode('STREET')}
@@ -177,7 +177,7 @@ export const CadastralMapViewer: React.FC = () => {
                 mapMode === 'STREET' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Cadastral Vector
+              {t('cadastralVector')}
             </button>
           </div>
 
@@ -186,7 +186,7 @@ export const CadastralMapViewer: React.FC = () => {
             className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors"
           >
             <Scissors className="w-3.5 h-3.5 text-amber-400" />
-            Subdivision / Mutation Simulator
+            {t('mutationSim')}
           </button>
         </div>
       </div>
@@ -218,7 +218,7 @@ export const CadastralMapViewer: React.FC = () => {
               <div className="border-b border-slate-800 pb-3 flex items-start justify-between">
                 <div>
                   <span className="text-[10px] text-emerald-400 uppercase font-bold font-mono">
-                    PARCEL ID: {selectedFeature.bhuvanId}
+                    {t('parcelId')}: {selectedFeature.bhuvanId}
                   </span>
                   <h3 className="text-base font-bold text-white mt-0.5">
                     Khasra No. {selectedFeature.khasraNo}
@@ -260,7 +260,7 @@ export const CadastralMapViewer: React.FC = () => {
                   <span className="font-mono text-slate-200">{selectedFeature.khataNo}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Total Digitized Area:</span>
+                  <span className="text-slate-400">{t('totalArea')}:</span>
                   <span className="font-mono text-emerald-400 font-bold">
                     {selectedFeature.areaHectares} Ha ({(selectedFeature.areaHectares * 2.471).toFixed(2)} Acres)
                   </span>
@@ -270,15 +270,15 @@ export const CadastralMapViewer: React.FC = () => {
                   <span className="text-slate-300">{selectedFeature.landUse}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Soil Quality:</span>
+                  <span className="text-slate-400">{t('soilQuality')}:</span>
                   <span className="text-slate-300">{selectedFeature.soilType}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Irrigation Source:</span>
+                  <span className="text-slate-400">{t('irrigationStatus')}:</span>
                   <span className="text-slate-300">{selectedFeature.irrigationStatus}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Guideline Market Value:</span>
+                  <span className="text-slate-400">{t('marketVal')}:</span>
                   <span className="font-mono text-amber-300 font-semibold">
                     ₹{selectedFeature.marketValueINR.toLocaleString('en-IN')}
                   </span>

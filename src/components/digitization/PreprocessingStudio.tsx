@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const PreprocessingStudio: React.FC = () => {
-  const { activeRecord, updateActiveRecord, runOcrExtraction, setActiveTab, records, setActiveRecordId } = useLandRecord();
+  const { activeRecord, updateActiveRecord, runOcrExtraction, setActiveTab, records, setActiveRecordId, t } = useLandRecord();
 
   const originalCanvasRef = useRef<HTMLCanvasElement>(null);
   const processedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -91,10 +91,10 @@ export const PreprocessingStudio: React.FC = () => {
             AI Document Ingestion & Vision Pre-Processing Studio
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight">
-            Image Restoration & Multilingual Binarization Pipeline
+            {t('preprocTitle')}
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Real-time noise filtering, skew angle normalization, faded ink contrast recovery, and stamp suppression prior to OCR inference.
+            {t('preprocSubtitle')}
           </p>
         </div>
 
@@ -124,13 +124,13 @@ export const PreprocessingStudio: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sliders className="w-4 h-4 text-emerald-400" />
-              Restoration Parameters
+              {t('restorationParams')}
             </h3>
             <button
               onClick={handleAutoEnhance}
               className="text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-medium transition-colors inline-flex items-center gap-1"
             >
-              <Sparkles className="w-3 h-3" /> Auto-Tune
+              <Sparkles className="w-3 h-3" /> {t('autoTune')}
             </button>
           </div>
 
@@ -140,7 +140,7 @@ export const PreprocessingStudio: React.FC = () => {
               <div className="flex justify-between">
                 <label className="text-slate-300 font-medium flex items-center gap-1.5">
                   <RotateCw className="w-3.5 h-3.5 text-slate-400" />
-                  Skew Angle Correction
+                  {t('skewAngle')}
                 </label>
                 <span className="font-mono text-emerald-400 font-bold">{config.deskewAngle}°</span>
               </div>
@@ -163,7 +163,7 @@ export const PreprocessingStudio: React.FC = () => {
             {/* 2. Adaptive Binarization Threshold */}
             <div className="space-y-1.5">
               <div className="flex justify-between">
-                <label className="text-slate-300 font-medium">Binarization (Sauvola / Otsu)</label>
+                <label className="text-slate-300 font-medium">{t('binarizationSauvola')}</label>
                 <span className="font-mono text-emerald-400 font-bold">{config.binarizationThreshold}</span>
               </div>
               <input
@@ -185,7 +185,7 @@ export const PreprocessingStudio: React.FC = () => {
             {/* 3. Contrast & Gamma Boost */}
             <div className="space-y-1.5">
               <div className="flex justify-between">
-                <label className="text-slate-300 font-medium">Contrast & Gamma Boost</label>
+                <label className="text-slate-300 font-medium">{t('contrastBoost')}</label>
                 <span className="font-mono text-teal-400 font-bold">+{config.contrastBoost}%</span>
               </div>
               <input
@@ -202,7 +202,7 @@ export const PreprocessingStudio: React.FC = () => {
             {/* 4. Denoising Level */}
             <div className="space-y-1.5">
               <div className="flex justify-between">
-                <label className="text-slate-300 font-medium">Noise & Artifact Smoothing</label>
+                <label className="text-slate-300 font-medium">{t('noiseSmoothing')}</label>
                 <span className="font-mono text-teal-400 font-bold">{config.denoisingLevel}%</span>
               </div>
               <input
@@ -219,7 +219,7 @@ export const PreprocessingStudio: React.FC = () => {
             {/* Feature Toggles */}
             <div className="pt-2 border-t border-slate-800/80 space-y-2.5">
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-slate-300">Faded Ink Stroke Recovery</span>
+                <span className="text-slate-300">{t('inkRecovery')}</span>
                 <input
                   type="checkbox"
                   checked={config.inkRecovery}
@@ -229,7 +229,7 @@ export const PreprocessingStudio: React.FC = () => {
               </label>
 
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-slate-300">Suppress Revenue Stamp Clutter</span>
+                <span className="text-slate-300">{t('stampSuppression')}</span>
                 <input
                   type="checkbox"
                   checked={config.stampSuppression}
@@ -239,7 +239,7 @@ export const PreprocessingStudio: React.FC = () => {
               </label>
 
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-slate-300">AI Super-Resolution Sharpening</span>
+                <span className="text-slate-300">{t('superResolution')}</span>
                 <input
                   type="checkbox"
                   checked={config.superResolution}
@@ -265,7 +265,7 @@ export const PreprocessingStudio: React.FC = () => {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Apply & Execute Deep OCR
+                  {t('applyAndRunOcr')}
                 </>
               )}
             </button>
@@ -285,7 +285,7 @@ export const PreprocessingStudio: React.FC = () => {
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Split View (Original vs Restored)
+                {t('splitView')}
               </button>
               <button
                 onClick={() => setActiveTabMode('PROCESSED_ONLY')}
@@ -295,7 +295,7 @@ export const PreprocessingStudio: React.FC = () => {
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                AI Enhanced View
+                {t('aiEnhancedView')}
               </button>
               <button
                 onClick={() => setActiveTabMode('ORIGINAL_ONLY')}
@@ -305,7 +305,7 @@ export const PreprocessingStudio: React.FC = () => {
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Original Raw Scan
+                {t('rawScanView')}
               </button>
             </div>
 

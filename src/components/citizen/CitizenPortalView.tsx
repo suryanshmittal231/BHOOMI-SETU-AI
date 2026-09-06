@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const CitizenPortalView: React.FC = () => {
-  const { records, setActiveRecordId, setActiveTab } = useLandRecord();
+  const { records, setActiveRecordId, setActiveTab, t } = useLandRecord();
 
   const [searchDistrict, setSearchDistrict] = useState('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -48,16 +48,16 @@ export const CitizenPortalView: React.FC = () => {
             Digital India Public Land Records Portal (नागरिक भू-अभिलेख सेवा)
           </div>
           <h2 className="text-2xl font-extrabold text-white tracking-tight">
-            Search & Download Certified Record of Rights (RoR)
+            {t('citizenTitle')}
           </h2>
           <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
-            Instant digital access to certified Khatauni, Satbara (7/12), Patta-Chitta, and Pahani extracts with digital signatures and QR validation compliant with DILRMP.
+            {t('citizenSubtitle')}
           </p>
         </div>
 
         <div className="flex items-center space-x-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-xs text-slate-300">
           <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span>Legally Valid under Information Technology Act 2000 (Section 65B)</span>
+          <span>{t('legalValid')}</span>
         </div>
       </div>
 
@@ -155,13 +155,13 @@ export const CitizenPortalView: React.FC = () => {
                     onClick={handlePrint}
                     className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   >
-                    <Printer className="w-3.5 h-3.5 text-slate-300" /> Print RoR
+                    <Printer className="w-3.5 h-3.5 text-slate-300" /> {t('printRor')}
                   </button>
                   <button
                     onClick={() => setDownloadModal(true)}
                     className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow transition-colors"
                   >
-                    <Download className="w-3.5 h-3.5" /> Download PDF
+                    <Download className="w-3.5 h-3.5" /> {t('downloadPdf')}
                   </button>
                 </div>
               </div>

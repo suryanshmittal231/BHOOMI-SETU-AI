@@ -31,7 +31,8 @@ export const ExtractedFieldsForm: React.FC = () => {
     rejectRecord,
     queueActiveLearningCorrection,
     selectedBoundingBoxId,
-    setSelectedBoundingBoxId
+    setSelectedBoundingBoxId,
+    t
   } = useLandRecord();
 
   const [activeUnit, setActiveUnit] = useState<AreaUnit>(activeRecord?.plotAreaUnit || 'HECTARE');
@@ -218,7 +219,7 @@ export const ExtractedFieldsForm: React.FC = () => {
                     onClick={handleAutoFixShares}
                     className="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow transition-colors"
                   >
-                    Auto-Normalize
+                    {t('autoNormalize')}
                   </button>
                 )}
               </div>
@@ -230,12 +231,12 @@ export const ExtractedFieldsForm: React.FC = () => {
         <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-3">
           <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
             <Building className="w-3.5 h-3.5 text-emerald-400" />
-            Administrative Hierarchy & Location
+            {t('adminHierarchy')}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">State / राज्य</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('stateLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.state}
@@ -244,7 +245,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">District / जनपद</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('districtLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.district}
@@ -253,7 +254,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Tehsil / तहसील / Taluk</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('tehsilLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.tehsil}
@@ -262,7 +263,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Revenue Village / मौजा</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('villageLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.revenueVillage}
@@ -278,7 +279,7 @@ export const ExtractedFieldsForm: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-teal-400" />
-              Land Identifiers & Area Metrics
+              {t('landIdentifiers')}
             </div>
 
             {/* Area Unit Selector */}
@@ -301,7 +302,7 @@ export const ExtractedFieldsForm: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Khata / Khewat No.</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('khataNoLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.khataNumber}
@@ -310,7 +311,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Khasra / Dag / Survey No.</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('khasraNoLabel')}</label>
               <input
                 type="text"
                 value={activeRecord.khasraNumber}
@@ -320,7 +321,7 @@ export const ExtractedFieldsForm: React.FC = () => {
             </div>
             <div>
               <label className="text-[10px] text-slate-400 block mb-1">
-                Plot Area ({UNIT_LABELS[activeUnit as keyof typeof UNIT_LABELS]?.symbol || 'ha'})
+                {t('plotAreaLabel')} ({UNIT_LABELS[activeUnit as keyof typeof UNIT_LABELS]?.symbol || 'ha'})
               </label>
               <input
                 type="number"
@@ -338,7 +339,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1">Land Classification</label>
+              <label className="text-[10px] text-slate-400 block mb-1">{t('landClassLabel')}</label>
               <select
                 value={activeRecord.landClassification}
                 onChange={(e) => updateRecordField('landClassification', e.target.value as LandClassification)}
@@ -362,7 +363,7 @@ export const ExtractedFieldsForm: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
               <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
-              Registered Landowners (Column 4 - Khatedar Details)
+              {t('landownersTitle')}
             </div>
 
             {/* Live Share Math Validator Badge */}
@@ -382,7 +383,7 @@ export const ExtractedFieldsForm: React.FC = () => {
                 onClick={handleAddOwner}
                 className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium px-2 py-1 rounded-lg border border-slate-700 flex items-center gap-1"
               >
-                <Plus className="w-3 h-3" /> Add Co-Owner
+                <Plus className="w-3 h-3" /> {t('addCoOwner')}
               </button>
             </div>
           </div>
@@ -460,7 +461,7 @@ export const ExtractedFieldsForm: React.FC = () => {
           <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-2">
             <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-amber-400" />
-              Mutation History (नामांतरण आदेश)
+              {t('mutationTitle')}
             </div>
             {activeRecord.mutations && activeRecord.mutations.length > 0 ? (
               <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] space-y-1">
@@ -486,7 +487,7 @@ export const ExtractedFieldsForm: React.FC = () => {
           <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-2">
             <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5 text-cyan-400" />
-              Bank Lien & Encumbrance Status
+              {t('encumbranceTitle')}
             </div>
             {activeRecord.encumbrances && activeRecord.encumbrances.length > 0 ? (
               <div className="bg-rose-950/20 p-3 rounded-lg border border-rose-500/30 text-[11px] space-y-1">
@@ -523,7 +524,7 @@ export const ExtractedFieldsForm: React.FC = () => {
             className="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors"
           >
             <BrainCircuit className="w-3.5 h-3.5 text-amber-400" />
-            Send Feedback to AI Model
+            {t('sendAiFeedback')}
           </button>
         </div>
 
@@ -532,7 +533,7 @@ export const ExtractedFieldsForm: React.FC = () => {
             onClick={() => setRejectModalOpen(true)}
             className="bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-700/50 px-3.5 py-2 rounded-xl font-semibold transition-colors"
           >
-            Flag Dispute / Reject
+            {t('flagDispute')}
           </button>
 
           {userRole === 'PATWARI' && (
@@ -541,7 +542,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl shadow-lg shadow-emerald-950/60 flex items-center gap-1.5 transition-all"
             >
               <UserCheck className="w-4 h-4" />
-              Verify & Forward to Tehsildar
+              {t('verifyPatwari')}
             </button>
           )}
 
@@ -551,7 +552,7 @@ export const ExtractedFieldsForm: React.FC = () => {
               className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-5 py-2 rounded-xl shadow-lg shadow-emerald-950/60 flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
             >
               <Lock className="w-4 h-4" />
-              Digitally Sign & Approve (NIC e-Sign)
+              {t('approveTehsildar')}
             </button>
           )}
         </div>

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { activeTab, setActiveTab, records, userRole } = useLandRecord();
+  const { activeTab, setActiveTab, records, userRole, t } = useLandRecord();
 
   const pendingCount = records.filter(r => r.status === 'VERIFICATION_PENDING').length;
   const disputedCount = records.filter(r => r.status === 'DISPUTED' || (r.validationIssues && r.validationIssues.some(i => i.severity === 'CRITICAL'))).length;
@@ -30,52 +30,52 @@ export const Sidebar: React.FC = () => {
   }[] = [
     {
       id: 'DASHBOARD',
-      label: 'Executive Command',
-      subLabel: 'Overview & State Progress',
+      label: t('tabDashboard'),
+      subLabel: t('tabDashboardSub'),
       icon: LayoutDashboard
     },
     {
       id: 'DIGITIZE_STUDIO',
-      label: 'Document Ingestion',
-      subLabel: 'Pre-process & OCR Studio',
+      label: t('tabDigitize'),
+      subLabel: t('tabDigitizeSub'),
       icon: ScanLine
     },
     {
       id: 'SPLIT_VERIFY',
-      label: 'HITL Verification',
-      subLabel: 'Split-Screen Validation',
+      label: t('tabVerify'),
+      subLabel: t('tabVerifySub'),
       icon: SplitSquareVertical,
       badge: pendingCount,
       badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
     },
     {
       id: 'CADASTRAL_GIS',
-      label: 'Cadastral GIS Map',
-      subLabel: 'Khasra Parcel Visualizer',
+      label: t('tabGis'),
+      subLabel: t('tabGisSub'),
       icon: MapPin
     },
     {
       id: 'ACTIVE_LEARNING',
-      label: 'AI Active Learning',
-      subLabel: 'Feedback Queue & Retrain',
+      label: t('tabLearning'),
+      subLabel: t('tabLearningSub'),
       icon: BrainCircuit
     },
     {
       id: 'LRMS_API_HUB',
-      label: 'DILRMP / LRMS Hub',
-      subLabel: 'Open APIs & Export',
+      label: t('tabLrms'),
+      subLabel: t('tabLrmsSub'),
       icon: Server
     },
     {
       id: 'AUDIT_LEDGER',
-      label: 'Audit & Blockchain',
-      subLabel: 'SHA-256 Provenance Log',
+      label: t('tabAudit'),
+      subLabel: t('tabAuditSub'),
       icon: FileCheck2
     },
     {
       id: 'CITIZEN_PORTAL',
-      label: 'Citizen RoR Portal',
-      subLabel: 'Public Land Record Search',
+      label: t('tabCitizen'),
+      subLabel: t('tabCitizenSub'),
       icon: Users
     }
   ];
@@ -128,9 +128,9 @@ export const Sidebar: React.FC = () => {
             >
               <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <div>
-                <span className="font-semibold block text-[11px]">Discrepancy Alerts ({disputedCount})</span>
+                <span className="font-semibold block text-[11px]">{t('discrepancyAlertTitle')} ({disputedCount})</span>
                 <span className="text-[10px] text-rose-400/80 leading-tight block">
-                  Area ratio / dispute flags need resolution.
+                  {t('discrepancyAlertSub')}
                 </span>
               </div>
             </div>
@@ -145,7 +145,7 @@ export const Sidebar: React.FC = () => {
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
             <div>
               <div className="text-[11px] font-semibold text-slate-200">{userRole} MODE</div>
-              <div className="text-[9px] text-slate-400">Authenticated NIC SSO</div>
+              <div className="text-[9px] text-slate-400">{t('authGovt')}</div>
             </div>
           </div>
           <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">
@@ -157,7 +157,7 @@ export const Sidebar: React.FC = () => {
           <span>DILRMP Ver: 3.4.2</span>
           <span className="flex items-center gap-1 text-emerald-400/90 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            AI Engine Online
+            {t('aiOnline')}
           </span>
         </div>
       </div>

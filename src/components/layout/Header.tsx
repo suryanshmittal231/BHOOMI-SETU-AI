@@ -22,6 +22,7 @@ export const Header: React.FC = () => {
     setUserRole, 
     uiLanguage, 
     setUiLanguage, 
+    t,
     searchQuery, 
     setSearchQuery,
     records,
@@ -67,15 +68,15 @@ export const Header: React.FC = () => {
         <div className="flex items-center space-x-3">
           <span className="flex items-center font-semibold text-emerald-400">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
-            DILRMP Compliant (Digital India Land Records Modernization Programme)
+            {t('dilrmpBadge')}
           </span>
           <span className="text-slate-600">|</span>
-          <span className="text-slate-400 hidden sm:inline">Ministry of Rural Development & Land Resources, Govt. of India</span>
+          <span className="text-slate-400 hidden sm:inline">{t('ministryTitle')}</span>
         </div>
         <div className="flex items-center space-x-4">
           <span className="text-amber-400/90 flex items-center gap-1 font-mono text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            SHA-256 Immutable Audit Active
+            {t('immutableAudit')}
           </span>
           <span className="text-slate-500 hidden md:inline">SIH-2024 Working Prototype</span>
         </div>
@@ -96,7 +97,7 @@ export const Header: React.FC = () => {
               </h1>
             </div>
             <p className="text-[11px] text-slate-400 font-devanagari tracking-wide hidden sm:block">
-              भू-अभिलेख सेतु | Intelligent Land Record Digitization & Validation System
+              {t('brandSubtitle')}
             </p>
           </div>
         </div>
@@ -109,7 +110,7 @@ export const Header: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Khasra No, Khata, Survey, Owner Name, Village..."
+              placeholder={t('searchPlaceholder')}
               className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-950/80 border border-slate-700/80 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
             />
             {searchQuery && (
@@ -117,7 +118,7 @@ export const Header: React.FC = () => {
                 type="submit" 
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] px-2 py-0.5 rounded font-medium transition-colors"
               >
-                Find
+                {t('findBtn')}
               </button>
             )}
           </div>
@@ -129,12 +130,12 @@ export const Header: React.FC = () => {
           <div className="hidden xl:flex items-center space-x-2 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 py-1 text-xs">
             <div className="flex items-center gap-1 text-emerald-400" title="Auto-Validated">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{records.filter(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS').length} Validated</span>
+              <span>{records.filter(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS').length} {t('validatedCount')}</span>
             </div>
             <span className="text-slate-700">•</span>
             <div className="flex items-center gap-1 text-amber-400" title="Pending Verification">
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{pendingReviews} Pending</span>
+              <span>{pendingReviews} {t('pendingCount')}</span>
             </div>
           </div>
 
@@ -144,7 +145,7 @@ export const Header: React.FC = () => {
             <select
               value={uiLanguage}
               onChange={handleLangChange}
-              className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer"
+              className="bg-transparent text-slate-200 text-xs focus:outline-none cursor-pointer font-medium"
             >
               <option value="en" className="bg-slate-900 text-white">English (EN)</option>
               <option value="hi" className="bg-slate-900 text-white">हिन्दी (Hindi)</option>
@@ -158,17 +159,17 @@ export const Header: React.FC = () => {
           <div className="flex items-center bg-slate-800/90 border border-emerald-500/40 rounded-lg px-2.5 py-1 text-xs">
             <UserCheck className="w-3.5 h-3.5 text-emerald-400 mr-1.5" />
             <div className="flex flex-col">
-              <span className="text-[9px] text-emerald-400 font-semibold uppercase leading-tight">Active Role</span>
+              <span className="text-[9px] text-emerald-400 font-semibold uppercase leading-tight">{t('activeRole')}</span>
               <select
                 value={userRole}
                 onChange={handleRoleChange}
                 className="bg-transparent text-slate-100 font-medium text-xs focus:outline-none cursor-pointer"
               >
-                <option value="OPERATOR" className="bg-slate-900 text-white">Data Entry Operator (DEO)</option>
-                <option value="PATWARI" className="bg-slate-900 text-white">Patwari / Revenue Inspector</option>
-                <option value="TEHSILDAR" className="bg-slate-900 text-white">Tehsildar / SDM (Approver)</option>
-                <option value="ADMIN" className="bg-slate-900 text-white">System Administrator</option>
-                <option value="CITIZEN" className="bg-slate-900 text-white">Citizen / Public Portal</option>
+                <option value="OPERATOR" className="bg-slate-900 text-white">{t('roleOperator')}</option>
+                <option value="PATWARI" className="bg-slate-900 text-white">{t('rolePatwari')}</option>
+                <option value="TEHSILDAR" className="bg-slate-900 text-white">{t('roleTehsildar')}</option>
+                <option value="ADMIN" className="bg-slate-900 text-white">{t('roleAdmin')}</option>
+                <option value="CITIZEN" className="bg-slate-900 text-white">{t('roleCitizen')}</option>
               </select>
             </div>
           </div>
@@ -179,7 +180,7 @@ export const Header: React.FC = () => {
             className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-md transition-all transform hover:-translate-y-0.5"
           >
             <UploadCloud className="w-3.5 h-3.5" />
-            <span>Upload Record</span>
+            <span>{t('uploadRecordBtn')}</span>
           </button>
 
           {/* Quick Notifications Trigger */}

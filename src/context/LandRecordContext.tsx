@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { LandRecord, UserRole, LanguageCode, BoundingBox, ValidationIssue, PreprocessingConfig } from '../types/landRecord';
 import { AuditBlock } from '../types/audit';
 import { CorrectedToken, ModelMetrics } from '../types/learning';
 import { SAMPLE_LAND_RECORDS } from '../data/sampleRecords';
 import { validateLandRecord } from '../utils/validationRules';
 import { createAuditBlock, verifyAuditChain } from '../utils/cryptoAudit';
+import { getTranslation, TranslationKey } from '../utils/translations';
 
 export type ActiveTab = 
   | 'DASHBOARD' 
@@ -26,6 +27,7 @@ interface LandRecordContextType {
   setUserRole: (role: UserRole) => void;
   uiLanguage: LanguageCode;
   setUiLanguage: (lang: LanguageCode) => void;
+  t: (key: TranslationKey) => string;
   selectedBoundingBoxId: string | null;
   setSelectedBoundingBoxId: (id: string | null) => void;
   auditChain: AuditBlock[];
@@ -338,6 +340,10 @@ export const LandRecordProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }));
   };
 
+  const t = useCallback((key: TranslationKey) => {
+    return getTranslation(uiLanguage, key);
+  }, [uiLanguage]);
+
   return (
     <LandRecordContext.Provider
       value={{
@@ -350,6 +356,7 @@ export const LandRecordProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setUserRole,
         uiLanguage,
         setUiLanguage,
+        t,
         selectedBoundingBoxId,
         setSelectedBoundingBoxId,
         auditChain,
