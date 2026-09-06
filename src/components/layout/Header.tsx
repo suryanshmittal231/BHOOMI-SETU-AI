@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { UserRole, LanguageCode } from '../../types/landRecord';
+import { DocumentUploadModal } from '../digitization/DocumentUploadModal';
 import { 
   ShieldCheck, 
   Search, 
@@ -11,7 +12,8 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Layers,
-  Sparkles
+  Sparkles,
+  UploadCloud
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -26,6 +28,8 @@ export const Header: React.FC = () => {
     setActiveRecordId,
     setActiveTab
   } = useLandRecord();
+
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
   const totalDisputes = records.filter(r => r.status === 'DISPUTED' || (r.validationIssues && r.validationIssues.length > 0)).length;
   const pendingReviews = records.filter(r => r.status === 'VERIFICATION_PENDING').length;
@@ -169,6 +173,15 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
+          {/* Ingest Document Quick Button */}
+          <button
+            onClick={() => setIsUploadOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow-md transition-all transform hover:-translate-y-0.5"
+          >
+            <UploadCloud className="w-3.5 h-3.5" />
+            <span>Upload Record</span>
+          </button>
+
           {/* Quick Notifications Trigger */}
           <button 
             onClick={() => setActiveTab('SPLIT_VERIFY')}
@@ -184,6 +197,9 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Upload Document Modal */}
+      <DocumentUploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
     </header>
   );
 };
