@@ -373,8 +373,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
   const isPdf = fileName.toLowerCase().endsWith('.pdf');
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-scaleUp text-slate-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md overflow-y-auto p-2 sm:p-4 md:p-6 flex justify-center items-start sm:items-center">
+      <div className="my-auto max-w-2xl w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] animate-scaleUp text-slate-200">
         
         {/* Hidden File Input */}
         <input
@@ -386,19 +386,19 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
         />
 
         {/* Modal Header */}
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="bg-slate-950 px-5 sm:px-6 py-3.5 border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                 <span>Upload & Digitize Land Record PDF</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold hidden sm:inline-block">
                   BHOOMI-OCR v2.4
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">DILRMP-compliant layout classification and Indic Vision OCR</p>
+              <p className="text-[11px] text-slate-400">DILRMP-compliant layout classification and Indic Vision OCR</p>
             </div>
           </div>
           <button
@@ -410,7 +410,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
         </div>
 
         {/* Mode Selector Tabs */}
-        <div className="bg-slate-950/80 px-6 pt-3 border-b border-slate-800/80 flex items-center gap-2 text-xs">
+        <div className="bg-slate-950/90 px-5 sm:px-6 pt-2.5 border-b border-slate-800/80 flex items-center gap-2 text-xs shrink-0">
           <button
             type="button"
             onClick={() => setModalMode('UPLOAD_PDF')}
@@ -785,7 +785,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
         </div>
 
         {/* Modal Footer */}
-        <div className="bg-slate-950 px-6 py-4 border-t border-slate-800 flex items-center justify-between">
+        <div className="bg-slate-950 px-5 sm:px-6 py-3.5 border-t border-slate-800 flex items-center justify-between shrink-0">
           <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-mono">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             <span>BhoomiVision LayoutLMv3 Ready</span>
