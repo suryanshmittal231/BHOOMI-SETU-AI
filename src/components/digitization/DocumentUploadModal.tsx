@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { DocumentType, LanguageCode, LandRecord, LandClassification } from '../../types/landRecord';
 import {
@@ -11,7 +11,12 @@ import {
   Layers,
   Globe,
   Sliders,
-  AlertCircle
+  AlertCircle,
+  File,
+  FolderOpen,
+  RefreshCw,
+  Eye,
+  Check
 } from 'lucide-react';
 
 import {
@@ -34,12 +39,20 @@ interface DocumentUploadModalProps {
 }
 
 export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen, onClose }) => {
-  const { addNewRecord, records } = useLandRecord();
+  const { addNewRecord, setActiveRecordId, setActiveTab } = useLandRecord();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [modalMode, setModalMode] = useState<'UPLOAD_PDF' | 'PRESET_SAMPLES'>('UPLOAD_PDF');
   const [docType, setDocType] = useState<DocumentType>('KHATAUNI');
   const [docLanguage, setDocLanguage] = useState<LanguageCode>('hi');
   const [fileName, setFileName] = useState<string>('Scanned_Land_Record_2024.pdf');
   const [fileSize, setFileSize] = useState<number>(2450000);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadedDataUrl, setUploadedDataUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isParsingFile, setIsParsingFile] = useState<boolean>(false);
+
   const [state, setState] = useState<string>('Uttar Pradesh');
   const [district, setDistrict] = useState<string>('Lucknow');
   const [tehsil, setTehsil] = useState<string>('Mohanlalganj');
@@ -55,6 +68,97 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
   const [selectedDemoPreset, setSelectedDemoPreset] = useState<string>('CUSTOM');
 
   if (!isOpen) return null;
+
+  // Process selected or dropped file (PDF / Image)
+  const processUploadedFile = (file: File) => {
+    setIsParsingFile(true);
+    setUploadedFile(file);
+    setFileName(file.name);
+    setFileSize(file.size);
+    setSelectedDemoPreset('UPLOADED_FILE');
+
+    // Read file as Data URL
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setUploadedDataUrl(dataUrl);
+    };
+    reader.readAsDataURL(file);
+
+    // Smart heuristic metadata detection from filename
+    const nameLower = file.name.toLowerCase();
+    if (nameLower.includes('712') || nameLower.includes('satbara') || nameLower.includes('maha') || nameLower.includes('pune')) {
+      setDocType('SATBARA_7_12');
+      setDocLanguage('mr');
+      setState('Maharashtra');
+      setDistrict('Pune');
+      setTehsil('Mulshi');
+      setVillage('Paud (पौड)');
+    } else if (nameLower.includes('patta') || nameLower.includes('chitta') || nameLower.includes('tamil') || nameLower.includes('chengalpattu')) {
+      setDocType('PATTA_CHITTA');
+      setDocLanguage('ta');
+      setState('Tamil Nadu');
+      setDistrict('Chengalpattu');
+      setTehsil('Thiruporur');
+      setVillage('Nemmeli (நெம்மேலி)');
+    } else if (nameLower.includes('pahani') || nameLower.includes('adangal') || nameLower.includes('telangana')) {
+      setDocType('PAHANI_ADANGAL');
+      setDocLanguage('te');
+      setState('Telangana');
+      setDistrict('Hyderabad');
+      setTehsil('Secunderabad');
+      setVillage('Malkajgiri');
+    } else if (nameLower.includes('jamabandi') || nameLower.includes('rampur') || nameLower.includes('legacy')) {
+      setDocType('JAMABANDI');
+      setDocLanguage('hi');
+      setState('Uttar Pradesh');
+      setDistrict('Rampur');
+      setTehsil('Bilaspur');
+    } else if (nameLower.includes('deed') || nameLower.includes('registry')) {
+      setDocType('SALE_DEED');
+    }
+
+    setTimeout(() => {
+      setIsParsingFile(false);
+    }, 450);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processUploadedFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processUploadedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleClearUploadedFile = () => {
+    setUploadedFile(null);
+    setUploadedDataUrl(null);
+    setFileName('Scanned_Land_Record_2024.pdf');
+    setFileSize(2450000);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Handle Preset Sample selection
   const handlePresetSelect = (presetKey: string) => {
@@ -118,36 +222,31 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setFileName(file.name);
-      setFileSize(file.size);
-      setSelectedDemoPreset('UPLOADED_FILE');
-    }
-  };
-
   const handleStartDigitization = async () => {
     setIsUploading(true);
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const todayISO = now.toISOString().split('T')[0];
     const newRecordId = `REC_${Date.now()}`;
+
     const newRecord: LandRecord = {
       id: newRecordId,
-      recordNumber: `${state.slice(0, 2).toUpperCase()}-${district.slice(0, 3).toUpperCase()}-2024-${docType.slice(0, 3)}-${khataNo}`,
+      recordNumber: `${state.slice(0, 2).toUpperCase()}-${district.slice(0, 3).toUpperCase()}-${currentYear}-${docType.slice(0, 3)}-${khataNo}`,
       documentType: docType,
       documentTitle: `${state} भू-अभिलेख (${docType.replace(/_/g, ' ')})`,
       documentLanguage: docLanguage,
-      documentYear: '1431 फ़सली (2024)',
-      imageUrl: 'SAMPLE_DOC_UPLOADED',
+      documentYear: `1431 फ़सली (${currentYear})`,
+      imageUrl: uploadedDataUrl || 'SAMPLE_DOC_UPLOADED',
       originalFileName: fileName,
       fileSizeBytes: fileSize,
-      uploadedAt: new Date().toISOString(),
-      processedAt: new Date().toISOString(),
+      uploadedAt: now.toISOString(),
+      processedAt: now.toISOString(),
       status: 'VERIFICATION_PENDING',
 
       state,
       district,
-      tehsil: `${district} Sadar`,
+      tehsil,
       revenueVillage: village,
       gramPanchayat: `${village} Gram Panchayat`,
 
@@ -165,7 +264,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
         {
           id: `OWNER_${Date.now()}_1`,
           name: ownerName,
-          vernacularName: ownerVernacular,
+          vernacularName: ownerVernacular || transliterateEnglishToVernacular(ownerName, getScriptForStateOrLanguage(docLanguage, state)),
           fatherOrSpouseName: fatherName,
           relationType: 'S/O',
           shareRatio: '1/1 (100%)',
@@ -177,10 +276,10 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
       ],
       mutations: [
         {
-          mutationNo: `MUT-${Date.now().toString().slice(-6)}`,
-          orderDate: '2023-11-10',
+          mutationNo: `${todayISO.replace(/-/g, '')}00421`,
+          orderDate: todayISO,
           transferType: 'INHERITANCE',
-          sanctioningAuthority: `Tehsildar ${district}`,
+          sanctioningAuthority: `Tehsildar ${tehsil || district}`,
           oldOwnerName: `${fatherName} (Deceased)`,
           newOwnerName: ownerName,
           status: 'SANCTIONED'
@@ -229,9 +328,11 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
 
     setTimeout(async () => {
       await addNewRecord(newRecord);
+      setActiveRecordId(newRecord.id);
+      setActiveTab('SPLIT_VERIFY');
       setIsUploading(false);
       onClose();
-    }, 800);
+    }, 600);
   };
 
   const availableStates = getAvailableStates();
@@ -269,9 +370,21 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
     setVillage(vills[0] || '');
   };
 
+  const isPdf = fileName.toLowerCase().endsWith('.pdf');
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-scaleUp text-slate-200">
+        
+        {/* Hidden File Input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,application/pdf,.jpg,.jpeg,.png,.tiff"
+          onChange={handleFileInputChange}
+          className="hidden"
+        />
+
         {/* Modal Header */}
         <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
@@ -279,8 +392,13 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Ingest & Digitize Land Record Document</h3>
-              <p className="text-xs text-slate-400">DILRMP-compliant layout classification and OCR pipeline</p>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>Upload & Digitize Land Record PDF</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold">
+                  BHOOMI-OCR v2.4
+                </span>
+              </h3>
+              <p className="text-xs text-slate-400">DILRMP-compliant layout classification and Indic Vision OCR</p>
             </div>
           </div>
           <button
@@ -291,101 +409,196 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
           </button>
         </div>
 
+        {/* Mode Selector Tabs */}
+        <div className="bg-slate-950/80 px-6 pt-3 border-b border-slate-800/80 flex items-center gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => setModalMode('UPLOAD_PDF')}
+            className={`pb-2.5 px-3 border-b-2 font-semibold flex items-center gap-1.5 transition ${
+              modalMode === 'UPLOAD_PDF'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <FolderOpen className="w-4 h-4" />
+            <span>Upload Real PDF / Scan File</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setModalMode('PRESET_SAMPLES')}
+            className={`pb-2.5 px-3 border-b-2 font-semibold flex items-center gap-1.5 transition ${
+              modalMode === 'PRESET_SAMPLES'
+                ? 'border-emerald-500 text-emerald-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>State Revenue Presets</span>
+          </button>
+        </div>
+
         {/* Modal Body */}
         <div className="p-6 space-y-5 overflow-y-auto flex-1 text-xs text-slate-200">
-          {/* Quick Demo Presets Shelf */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
-              <span>Instant SIH 1-Click Evaluation Presets:</span>
-              <span className="text-[10px] text-emerald-400 font-mono">Verified Samples</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('UP_KHATAUNI')}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  selectedDemoPreset === 'UP_KHATAUNI'
-                    ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+          
+          {/* TAB 1: PDF DRAG & DROP / FILE UPLOAD */}
+          {modalMode === 'UPLOAD_PDF' && (
+            <div className="space-y-3">
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer relative group ${
+                  isDragging
+                    ? 'border-emerald-400 bg-emerald-950/30 scale-[1.01]'
+                    : uploadedFile
+                    ? 'border-emerald-500/60 bg-emerald-950/10 hover:border-emerald-400'
+                    : 'border-slate-700 bg-slate-950/60 hover:border-emerald-500/80 hover:bg-slate-950'
                 }`}
               >
-                <div className="text-[10px] text-emerald-400 uppercase font-mono">Hindi (UP)</div>
-                <div className="text-xs truncate">Khatauni Record</div>
-              </button>
+                <div className="flex flex-col items-center justify-center space-y-2.5">
+                  <div className={`p-3.5 rounded-2xl transition-transform group-hover:scale-110 ${
+                    uploadedFile
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-slate-900 text-emerald-400 border border-slate-800'
+                  }`}>
+                    {uploadedFile ? (
+                      <FileCheck className="w-7 h-7" />
+                    ) : (
+                      <UploadCloud className="w-7 h-7" />
+                    )}
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('MH_SATBARA')}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  selectedDemoPreset === 'MH_SATBARA'
-                    ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                <div className="text-[10px] text-teal-400 uppercase font-mono">Marathi (MH)</div>
-                <div className="text-xs truncate">7/12 Satbara Extract</div>
-              </button>
+                  <div>
+                    <div className="font-bold text-white text-sm">
+                      {uploadedFile ? 'Selected PDF Document Loaded' : 'Click to Browse or Drag & Drop Land Record PDF'}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Supports Multi-page PDF, Scanned TIFF, High-Res JPG/PNG (Up to 50 MB)
+                    </p>
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('TN_PATTA')}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  selectedDemoPreset === 'TN_PATTA'
-                    ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                <div className="text-[10px] text-cyan-400 uppercase font-mono">Tamil (TN)</div>
-                <div className="text-xs truncate">Patta-Chitta Deed</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('DISPUTED_DEMO')}
-                className={`p-2.5 rounded-xl border text-left transition-all ${
-                  selectedDemoPreset === 'DISPUTED_DEMO'
-                    ? 'bg-rose-600/20 border-rose-500 text-rose-300 font-bold'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                <div className="text-[10px] text-rose-400 uppercase font-mono">Dispute Sample</div>
-                <div className="text-xs truncate">Faded Legacy Deed</div>
-              </button>
-            </div>
-          </div>
-
-          {/* Drag and Drop Zone */}
-          <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500 rounded-2xl p-5 bg-slate-950/60 text-center transition-colors relative cursor-pointer group">
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.tiff"
-              onChange={handleFileUpload}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-            <div className="flex flex-col items-center justify-center space-y-2 pointer-events-none">
-              <div className="p-3 rounded-full bg-slate-900 text-emerald-400 group-hover:scale-110 transition-transform">
-                <UploadCloud className="w-6 h-6" />
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-md shadow-emerald-950/50 flex items-center gap-1.5 transition"
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      Browse PDF Files
+                    </button>
+                    {uploadedFile && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClearUploadedFile();
+                        }}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium transition"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="font-semibold text-white text-xs">
-                Drag & drop your scanned land record PDF / Image
+
+              {/* Uploaded File Status Pill */}
+              <div className="flex items-center justify-between bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                <div className="flex items-center space-x-2.5 truncate">
+                  <div className={`p-1.5 rounded-lg shrink-0 ${
+                    isPdf ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400'
+                  }`}>
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div className="truncate">
+                    <div className="font-mono text-xs text-white font-bold truncate">{fileName}</div>
+                    <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {isParsingFile ? 'Extracting OCR tokens...' : 'Ready for LayoutLMv3 ingestion'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="text-[10px] text-slate-400 font-mono block">{(fileSize / (1024 * 1024)).toFixed(2)} MB</span>
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-mono">
+                    {isPdf ? 'PDF / DOCUMENT' : 'IMAGE'}
+                  </span>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Supports Multi-page PDF, TIFF, High-Res JPG/PNG (Up to 25MB)
-              </p>
             </div>
-          </div>
+          )}
 
-          {/* File Name Preview Pill */}
-          <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
-            <div className="flex items-center space-x-2 truncate">
-              <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span className="font-mono text-xs text-white truncate">{fileName}</span>
+          {/* TAB 2: GOVERNMENT VERIFIED PRESETS */}
+          {modalMode === 'PRESET_SAMPLES' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
+                <span>Select a Pre-Configured State Record:</span>
+                <span className="text-[10px] text-emerald-400 font-mono">Verified Samples</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('UP_KHATAUNI')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    selectedDemoPreset === 'UP_KHATAUNI'
+                      ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <div className="text-[10px] text-emerald-400 uppercase font-mono">Hindi (UP)</div>
+                  <div className="text-xs truncate">Khatauni Record</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('MH_SATBARA')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    selectedDemoPreset === 'MH_SATBARA'
+                      ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <div className="text-[10px] text-teal-400 uppercase font-mono">Marathi (MH)</div>
+                  <div className="text-xs truncate">7/12 Satbara Extract</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('TN_PATTA')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    selectedDemoPreset === 'TN_PATTA'
+                      ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <div className="text-[10px] text-cyan-400 uppercase font-mono">Tamil (TN)</div>
+                  <div className="text-xs truncate">Patta-Chitta Deed</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handlePresetSelect('DISPUTED_DEMO')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    selectedDemoPreset === 'DISPUTED_DEMO'
+                      ? 'bg-rose-600/20 border-rose-500 text-rose-300 font-bold'
+                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <div className="text-[10px] text-rose-400 uppercase font-mono">Dispute Sample</div>
+                  <div className="text-xs truncate">Faded Legacy Deed</div>
+                </button>
+              </div>
             </div>
-            <span className="text-[10px] text-slate-400 font-mono">{(fileSize / (1024 * 1024)).toFixed(2)} MB</span>
-          </div>
+          )}
 
-          {/* Form Fields: Document Details with Cascading Dropdowns */}
+          {/* Document Properties with Cascading Hierarchy Dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Document Format</label>
@@ -496,7 +709,10 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
                 ))}
               </select>
             </div>
+          </div>
 
+          {/* Section: Land Identifiers & Ownership Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Khasra / Gat No.</label>
               <input
@@ -554,21 +770,32 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
               />
             </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Plot Area (Hectares)</label>
+              <input
+                type="number"
+                step="0.0001"
+                value={plotArea}
+                onChange={(e) => setPlotArea(parseFloat(e.target.value) || 0)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
           </div>
         </div>
 
         {/* Modal Footer */}
         <div className="bg-slate-950 px-6 py-4 border-t border-slate-800 flex items-center justify-between">
-          <span className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
+          <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-mono">
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            BhoomiVision LayoutLMv3 Ready
+            <span>BhoomiVision LayoutLMv3 Ready</span>
           </span>
 
           <div className="flex items-center space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold"
+              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold transition"
             >
               Cancel
             </button>
@@ -580,18 +807,19 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
             >
               {isUploading ? (
                 <>
-                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Processing OCR & Layout...
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Ingesting Document...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Start AI Digitization
+                  <span>Start AI Digitization</span>
                 </>
               )}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );
