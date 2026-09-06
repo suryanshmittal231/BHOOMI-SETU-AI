@@ -518,10 +518,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
             </div>
 
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1 font-semibold flex items-center justify-between">
-                <span>Owner Name (English)</span>
-                <span className="text-[9px] text-emerald-400 font-mono">✨ Auto-Transliterates</span>
-              </label>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Owner Name (English)</label>
               <input
                 type="text"
                 value={ownerName}

@@ -616,12 +616,7 @@ export const ExtractedFieldsForm: React.FC = () => {
             <table className="w-full text-xs text-left text-slate-300">
               <thead className="bg-slate-900 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800">
                 <tr>
-                  <th className="px-3 py-2">
-                    <span className="flex items-center gap-1.5">
-                      <span>Owner Name (English / Vernacular)</span>
-                      <span className="text-[9px] text-emerald-400 font-mono font-normal normal-case">✨ Live Transliteration</span>
-                    </span>
-                  </th>
+                  <th className="px-3 py-2">Owner Name (English / Vernacular)</th>
                   <th className="px-3 py-2">Father / Spouse Name</th>
                   <th className="px-3 py-2">Share Ratio</th>
                   <th className="px-3 py-2">Aadhaar Hash</th>
