@@ -39,9 +39,13 @@ export function parseShareFraction(shareRatio: string): number {
   const trimmed = shareRatio.trim();
   
   if (trimmed.includes('/')) {
-    const [num, den] = trimmed.split('/').map(s => parseFloat(s.trim()));
-    if (!isNaN(num) && !isNaN(den) && den !== 0) {
-      return num / den;
+    const fractionMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+    if (fractionMatch) {
+      const num = parseFloat(fractionMatch[1]);
+      const den = parseFloat(fractionMatch[2]);
+      if (!isNaN(num) && !isNaN(den) && den !== 0) {
+        return num / den;
+      }
     }
   }
   
@@ -52,6 +56,57 @@ export function parseShareFraction(shareRatio: string): number {
   
   const parsed = parseFloat(trimmed);
   return isNaN(parsed) ? 0 : parsed;
+}
+
+/**
+ * Automatically recalculates and updates the (XX%) percentage representation
+ * whenever a fraction like "1/4", "1/4 (50%)", "2/3" or decimal is entered.
+ */
+export function formatShareRatioWithPercentage(shareRatio: string): { formatted: string; fraction: number } {
+  if (!shareRatio) return { formatted: '', fraction: 0 };
+  const trimmed = shareRatio.trim();
+
+  // 1. Check for fraction pattern "num / den"
+  const fractionMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)(?:\s*\(.*?\))?/);
+  if (fractionMatch) {
+    const num = parseFloat(fractionMatch[1]);
+    const den = parseFloat(fractionMatch[2]);
+    if (!isNaN(num) && !isNaN(den) && den > 0) {
+      const frac = num / den;
+      const pct = frac * 100;
+      const pctStr = Number.isInteger(pct) ? pct.toString() : pct.toFixed(2);
+      return {
+        formatted: `${fractionMatch[1]}/${fractionMatch[2]} (${pctStr}%)`,
+        fraction: frac
+      };
+    }
+  }
+
+  // 2. Percentage pattern "XX%"
+  const pctMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*%(?:\s*\(.*?\))?/);
+  if (pctMatch) {
+    const val = parseFloat(pctMatch[1]);
+    if (!isNaN(val)) {
+      return {
+        formatted: `${val}% (${val}%)`,
+        fraction: val / 100
+      };
+    }
+  }
+
+  // 3. Decimal pattern "0.25"
+  const dec = parseFloat(trimmed);
+  if (!isNaN(dec) && dec > 0 && dec <= 1 && !trimmed.includes('/')) {
+    const pct = dec * 100;
+    const pctStr = Number.isInteger(pct) ? pct.toString() : pct.toFixed(2);
+    return {
+      formatted: `${dec} (${pctStr}%)`,
+      fraction: dec
+    };
+  }
+
+  const frac = parseShareFraction(shareRatio);
+  return { formatted: shareRatio, fraction: frac };
 }
 
 /**

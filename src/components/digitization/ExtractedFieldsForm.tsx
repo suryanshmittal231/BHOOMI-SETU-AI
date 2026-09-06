@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { LandClassification, LandOwner, AreaUnit } from '../../types/landRecord';
-import { convertArea, parseShareFraction, UNIT_LABELS } from '../../utils/areaConverter';
+import { convertArea, parseShareFraction, formatShareRatioWithPercentage, UNIT_LABELS } from '../../utils/areaConverter';
 import {
   getAvailableStates,
   getDistrictsForState,
@@ -78,7 +78,7 @@ export const ExtractedFieldsForm: React.FC = () => {
     });
   };
 
-  // Handle owner field updates with real-time Indic transliteration
+  // Handle owner field updates with real-time Indic transliteration & dynamic share fraction sync
   const handleOwnerChange = (index: number, field: keyof LandOwner, value: any) => {
     const updatedOwners = [...activeRecord.owners];
     const currentOwner = updatedOwners[index];
@@ -89,15 +89,21 @@ export const ExtractedFieldsForm: React.FC = () => {
       newVernacular = transliterateEnglishToVernacular(value, targetScript);
     }
 
+    let finalValue = value;
+    let computedFraction = currentOwner.shareFraction;
+
+    if (field === 'shareRatio' && typeof value === 'string') {
+      const res = formatShareRatioWithPercentage(value);
+      finalValue = res.formatted;
+      computedFraction = res.fraction;
+    }
+
     updatedOwners[index] = {
       ...currentOwner,
-      [field]: value,
-      ...(field === 'name' ? { vernacularName: newVernacular } : {})
+      [field]: finalValue,
+      ...(field === 'name' ? { vernacularName: newVernacular } : {}),
+      ...(field === 'shareRatio' ? { shareFraction: computedFraction } : {})
     };
-
-    if (field === 'shareRatio') {
-      updatedOwners[index].shareFraction = parseShareFraction(value);
-    }
 
     updateActiveRecord({ owners: updatedOwners });
   };
@@ -658,13 +664,14 @@ export const ExtractedFieldsForm: React.FC = () => {
                         className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:ring-1 focus:ring-emerald-500"
                       />
                     </td>
-                    <td className="px-3 py-2 w-32">
+                    <td className="px-3 py-2 w-36">
                       <input
                         type="text"
                         value={owner.shareRatio}
                         onChange={(e) => handleOwnerChange(idx, 'shareRatio', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-emerald-400 font-mono font-bold"
-                        placeholder="e.g. 1/2, 50%"
+                        onBlur={(e) => handleOwnerChange(idx, 'shareRatio', e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-emerald-400 font-mono font-bold focus:ring-1 focus:ring-emerald-500"
+                        placeholder="e.g. 1/4 (25%)"
                       />
                     </td>
                     <td className="px-3 py-2">
