@@ -1,18 +1,40 @@
 import { LandRecord } from '../types/landRecord';
 
+export const getTodayDateString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const getRelativeDateString = (daysAgo: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const todayStr = getTodayDateString();
+const currentYear = new Date().getFullYear();
+const currentMutationNo = `${todayStr.replace(/-/g, '')}00421`;
+const currentISOTime = new Date().toISOString();
+
 export const SAMPLE_LAND_RECORDS: LandRecord[] = [
   {
     id: 'REC_UP_KHATAUNI_001',
-    recordNumber: 'UP-LKO-2024-KHT-00142',
+    recordNumber: `UP-LKO-${currentYear}-KHT-00142`,
     documentType: 'KHATAUNI',
     documentTitle: 'उत्तर प्रदेश भू-अभिलेख (खतौनी / अधिकार अभिलेख)',
     documentLanguage: 'hi',
-    documentYear: '1428-1433 फ़सली (2024)',
+    documentYear: `1428-1433 फ़सली (${currentYear})`,
     imageUrl: 'SAMPLE_DOC_UP_KHATAUNI',
     originalFileName: 'UP_Khatauni_Mohanlalganj_142.pdf',
     fileSizeBytes: 2450800,
-    uploadedAt: '2024-10-14T09:30:00Z',
-    processedAt: '2024-10-14T09:30:04Z',
+    uploadedAt: currentISOTime,
+    processedAt: currentISOTime,
     status: 'VERIFICATION_PENDING',
     
     state: 'Uttar Pradesh (उत्तर प्रदेश)',
@@ -62,8 +84,8 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
 
     mutations: [
       {
-        mutationNo: '2023081900421',
-        orderDate: '2023-08-19',
+        mutationNo: currentMutationNo,
+        orderDate: todayStr,
         transferType: 'INHERITANCE',
         sanctioningAuthority: 'Tehsildar Mohanlalganj',
         oldOwnerName: 'Ram Swaroop Sharma (Deceased)',
@@ -77,9 +99,9 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
         id: 'ENC_001',
         bankOrCreditorName: 'State Bank of India (Mohanlalganj Branch)',
         loanAmount: 350000,
-        mortgageDate: '2022-04-11',
+        mortgageDate: getRelativeDateString(180),
         status: 'ACTIVE_LIEN',
-        referenceNo: 'KCC-MHL-2022-9901'
+        referenceNo: `KCC-MHL-${currentYear}-9901`
       }
     ],
     isLitigationPending: false,
@@ -87,7 +109,7 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
     guidelineMarketValueINR: 4200000,
     stampDutyPaidINR: 294000,
     registrationBookNo: 'Book 1, Vol 142',
-    registrationDate: '2023-09-02',
+    registrationDate: getRelativeDateString(15),
 
     overallConfidence: 94.8,
     characterAccuracy: 97.2,
@@ -101,7 +123,7 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
       { id: 'b7', fieldKey: 'plotAreaOriginal', label: 'Area / क्षेत्रफल (हेक्टेयर)', x: 45, y: 28, width: 18, height: 4.5, page: 1, confidence: 95, extractedValue: '1.4500' },
       { id: 'b8', fieldKey: 'owner_1', label: 'Owner 1 / खातेदार का नाम', x: 66, y: 27, width: 28, height: 4, page: 1, confidence: 93, extractedValue: 'रमेश चंद्र शर्मा नि. ग्राम भाऊपुर' },
       { id: 'b9', fieldKey: 'owner_2', label: 'Owner 2 / सह-खातेदार', x: 66, y: 32, width: 28, height: 4, page: 1, confidence: 91, extractedValue: 'सुरेश कुमार शर्मा नि. ग्राम भाऊपुर' },
-      { id: 'b10', fieldKey: 'mutation', label: 'Mutation / नामांतरण आदेश', x: 10, y: 55, width: 80, height: 8, page: 1, confidence: 89, extractedValue: 'आदेशानुसार तहसीलदार वाद सं. 20230819 वारिसाना दर्ज हुआ' }
+      { id: 'b10', fieldKey: 'mutation', label: 'Mutation / नामांतरण आदेश', x: 10, y: 55, width: 80, height: 8, page: 1, confidence: 89, extractedValue: `आदेशानुसार तहसीलदार वाद सं. ${todayStr.replace(/-/g, '')} वारिसाना दर्ज हुआ` }
     ],
     validationIssues: [],
     preprocessingConfig: {
@@ -127,16 +149,16 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
   },
   {
     id: 'REC_MH_SATBARA_002',
-    recordNumber: 'MH-PUN-2024-712-00078',
+    recordNumber: `MH-PUN-${currentYear}-712-00078`,
     documentType: 'SATBARA_7_12',
     documentTitle: 'महाराष्ट्र शासन - गाव नमुना सात व बारा (7/12 Extract)',
     documentLanguage: 'mr',
-    documentYear: '२०२४ (2024)',
+    documentYear: `${currentYear}`,
     imageUrl: 'SAMPLE_DOC_MH_SATBARA',
     originalFileName: 'MahaBhumi_7_12_Mulshi_184.pdf',
     fileSizeBytes: 3120000,
-    uploadedAt: '2024-10-15T11:20:00Z',
-    processedAt: '2024-10-15T11:20:05Z',
+    uploadedAt: currentISOTime,
+    processedAt: currentISOTime,
     status: 'VERIFIED_PATWARI',
 
     state: 'Maharashtra (महाराष्ट्र)',
@@ -186,8 +208,8 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
 
     mutations: [
       {
-        mutationNo: 'Ferfar-8902',
-        orderDate: '2021-03-15',
+        mutationNo: `Ferfar-${todayStr.replace(/-/g, '').slice(2, 6)}02`,
+        orderDate: getRelativeDateString(30),
         transferType: 'PARTITION',
         sanctioningAuthority: 'Mandal Adhikari Paud',
         oldOwnerName: 'Tukaram Maruti Patil (Joint)',
@@ -201,9 +223,9 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
         id: 'ENC_MH_01',
         bankOrCreditorName: 'Bank of Maharashtra (Paud Branch)',
         loanAmount: 250000,
-        mortgageDate: '2023-01-10',
+        mortgageDate: getRelativeDateString(120),
         status: 'ACTIVE_LIEN',
-        referenceNo: 'BOM-AGRI-2023-8871'
+        referenceNo: `BOM-AGRI-${currentYear}-8871`
       }
     ],
     isLitigationPending: false,
@@ -211,7 +233,7 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
     guidelineMarketValueINR: 8200000,
     stampDutyPaidINR: 492000,
     registrationBookNo: 'Mulshi SRO Reg 4410',
-    registrationDate: '2021-04-05',
+    registrationDate: getRelativeDateString(45),
 
     overallConfidence: 96.2,
     characterAccuracy: 98.4,
@@ -249,16 +271,16 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
   },
   {
     id: 'REC_TN_PATTA_003',
-    recordNumber: 'TN-KPM-2024-PAT-01408',
+    recordNumber: `TN-KPM-${currentYear}-PAT-01408`,
     documentType: 'PATTA_CHITTA',
     documentTitle: 'தமிழ்நாடு அரசு வருவாய்த்துறை - பட்டா / சிட்டா சான்று',
     documentLanguage: 'ta',
-    documentYear: '1433 பசலி (2024)',
+    documentYear: `1433 பசலி (${currentYear})`,
     imageUrl: 'SAMPLE_DOC_TN_PATTA',
     originalFileName: 'TN_Patta_Chengalpattu_205.pdf',
     fileSizeBytes: 1980000,
-    uploadedAt: '2024-10-16T14:10:00Z',
-    processedAt: '2024-10-16T14:10:03Z',
+    uploadedAt: currentISOTime,
+    processedAt: currentISOTime,
     status: 'APPROVED_TEHSILDAR',
 
     state: 'Tamil Nadu (தமிழ்நாடு)',
@@ -296,8 +318,8 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
 
     mutations: [
       {
-        mutationNo: 'TR-2022-8812',
-        orderDate: '2022-11-20',
+        mutationNo: `TR-${currentYear}-8812`,
+        orderDate: getRelativeDateString(10),
         transferType: 'SALE_PURCHASE',
         sanctioningAuthority: 'Zonal Deputy Tahsildar Thiruporur',
         oldOwnerName: 'V. Rajendran',
@@ -350,16 +372,16 @@ export const SAMPLE_LAND_RECORDS: LandRecord[] = [
   },
   {
     id: 'REC_DISPUTED_AREA_MISMATCH_004',
-    recordNumber: 'UP-RAM-2024-KHT-00512',
+    recordNumber: `UP-RAM-${currentYear}-KHT-00512`,
     documentType: 'JAMABANDI',
     documentTitle: 'ऐतिहासिक जमाबंदी व विक्रयन पत्र (Faded Legacy Urdu/Hindi Record)',
     documentLanguage: 'hi',
-    documentYear: '1388 फ़सली (1981 Legacy Scan)',
+    documentYear: '1388 फ़सली (Legacy Archive)',
     imageUrl: 'SAMPLE_DOC_LEGACY_JAMABANDI',
     originalFileName: 'Legacy_Jamabandi_Rampur_512.pdf',
     fileSizeBytes: 4210000,
-    uploadedAt: '2024-10-17T16:45:00Z',
-    processedAt: '2024-10-17T16:45:06Z',
+    uploadedAt: currentISOTime,
+    processedAt: currentISOTime,
     status: 'DISPUTED',
 
     state: 'Uttar Pradesh (उत्तर प्रदेश)',

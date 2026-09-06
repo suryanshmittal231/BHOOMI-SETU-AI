@@ -698,23 +698,83 @@ export const ExtractedFieldsForm: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Mutation */}
           <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-2">
-            <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-amber-400" />
-              {t('mutationTitle')}
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                {t('mutationTitle')}
+              </div>
+              {activeRecord.mutations && activeRecord.mutations.length > 0 && (
+                <button
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    const updatedMutations = activeRecord.mutations.map((m, i) =>
+                      i === 0
+                        ? {
+                            ...m,
+                            orderDate: today,
+                            mutationNo: `${today.replace(/-/g, '')}00421`
+                          }
+                        : m
+                    );
+                    updateActiveRecord({ mutations: updatedMutations });
+                    setShowSuccessToast('Mutation order date synced to current date!');
+                    setTimeout(() => setShowSuccessToast(null), 3000);
+                  }}
+                  className="text-[10px] bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded border border-amber-500/40 flex items-center gap-1 transition"
+                  title="Sync mutation date to current date"
+                >
+                  <Calendar className="w-3 h-3" /> Sync Today
+                </button>
+              )}
             </div>
             {activeRecord.mutations && activeRecord.mutations.length > 0 ? (
-              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] space-y-1">
-                <div className="flex justify-between">
+              <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] space-y-2">
+                <div className="flex justify-between items-center">
                   <span className="text-slate-400">Order No:</span>
-                  <span className="font-mono text-white font-bold">{activeRecord.mutations[0].mutationNo}</span>
+                  <input
+                    type="text"
+                    value={activeRecord.mutations[0].mutationNo}
+                    onChange={(e) => {
+                      const updatedMutations = [...activeRecord.mutations];
+                      updatedMutations[0] = { ...updatedMutations[0], mutationNo: e.target.value };
+                      updateActiveRecord({ mutations: updatedMutations });
+                    }}
+                    className="bg-slate-950 border border-slate-700 rounded px-2 py-0.5 text-[11px] font-mono text-white font-bold text-right focus:ring-1 focus:ring-amber-500"
+                  />
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-slate-400">Date & Type:</span>
-                  <span className="text-slate-200">{activeRecord.mutations[0].orderDate} ({activeRecord.mutations[0].transferType})</span>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="date"
+                      value={activeRecord.mutations[0].orderDate}
+                      onChange={(e) => {
+                        const newDate = e.target.value;
+                        const updatedMutations = [...activeRecord.mutations];
+                        updatedMutations[0] = {
+                          ...updatedMutations[0],
+                          orderDate: newDate,
+                          mutationNo: `${newDate.replace(/-/g, '')}00421`
+                        };
+                        updateActiveRecord({ mutations: updatedMutations });
+                      }}
+                      className="bg-slate-950 border border-slate-700 rounded px-2 py-0.5 text-[11px] text-slate-200 focus:ring-1 focus:ring-amber-500"
+                    />
+                    <span className="text-slate-400 text-[10px]">({activeRecord.mutations[0].transferType})</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-slate-400">Authority:</span>
-                  <span className="text-slate-300">{activeRecord.mutations[0].sanctioningAuthority}</span>
+                  <input
+                    type="text"
+                    value={activeRecord.mutations[0].sanctioningAuthority}
+                    onChange={(e) => {
+                      const updatedMutations = [...activeRecord.mutations];
+                      updatedMutations[0] = { ...updatedMutations[0], sanctioningAuthority: e.target.value };
+                      updateActiveRecord({ mutations: updatedMutations });
+                    }}
+                    className="bg-slate-950 border border-slate-700 rounded px-2 py-0.5 text-[11px] text-slate-300 text-right focus:ring-1 focus:ring-amber-500"
+                  />
                 </div>
               </div>
             ) : (
