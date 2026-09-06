@@ -23,6 +23,10 @@ import {
   normalizeDistrictName,
   normalizeTehsilName
 } from '../../data/administrativeHierarchy';
+import {
+  transliterateEnglishToVernacular,
+  getScriptForStateOrLanguage
+} from '../../utils/transliteration';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -514,13 +518,32 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
             </div>
 
             <div>
-              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Owner Name (English)</label>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold flex items-center justify-between">
+                <span>Owner Name (English)</span>
+                <span className="text-[9px] text-emerald-400 font-mono">✨ Auto-Transliterates</span>
+              </label>
               <input
                 type="text"
                 value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setOwnerName(val);
+                  const script = getScriptForStateOrLanguage(docLanguage, state);
+                  setOwnerVernacular(transliterateEnglishToVernacular(val, script));
+                }}
                 placeholder="e.g. Vikram Singh Yadav"
                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Vernacular Name (क्षेत्रीय भाषा)</label>
+              <input
+                type="text"
+                value={ownerVernacular}
+                onChange={(e) => setOwnerVernacular(e.target.value)}
+                placeholder="e.g. विक्रम सिंह यादव"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-teal-300 font-sans focus:ring-1 focus:ring-emerald-500"
               />
             </div>
 

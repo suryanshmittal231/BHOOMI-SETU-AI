@@ -12,6 +12,10 @@ import {
   normalizeTehsilName
 } from '../../data/administrativeHierarchy';
 import {
+  transliterateEnglishToVernacular,
+  getScriptForStateOrLanguage
+} from '../../utils/transliteration';
+import {
   CheckCircle2,
   AlertTriangle,
   ShieldAlert,
@@ -74,12 +78,21 @@ export const ExtractedFieldsForm: React.FC = () => {
     });
   };
 
-  // Handle owner field updates
+  // Handle owner field updates with real-time Indic transliteration
   const handleOwnerChange = (index: number, field: keyof LandOwner, value: any) => {
     const updatedOwners = [...activeRecord.owners];
+    const currentOwner = updatedOwners[index];
+
+    let newVernacular = currentOwner.vernacularName;
+    if (field === 'name') {
+      const targetScript = getScriptForStateOrLanguage(activeRecord.documentLanguage, activeRecord.state);
+      newVernacular = transliterateEnglishToVernacular(value, targetScript);
+    }
+
     updatedOwners[index] = {
-      ...updatedOwners[index],
-      [field]: value
+      ...currentOwner,
+      [field]: value,
+      ...(field === 'name' ? { vernacularName: newVernacular } : {})
     };
 
     if (field === 'shareRatio') {
@@ -603,7 +616,12 @@ export const ExtractedFieldsForm: React.FC = () => {
             <table className="w-full text-xs text-left text-slate-300">
               <thead className="bg-slate-900 text-slate-400 uppercase text-[10px] font-semibold border-b border-slate-800">
                 <tr>
-                  <th className="px-3 py-2">Owner Name (English / Vernacular)</th>
+                  <th className="px-3 py-2">
+                    <span className="flex items-center gap-1.5">
+                      <span>Owner Name (English / Vernacular)</span>
+                      <span className="text-[9px] text-emerald-400 font-mono font-normal normal-case">✨ Live Transliteration</span>
+                    </span>
+                  </th>
                   <th className="px-3 py-2">Father / Spouse Name</th>
                   <th className="px-3 py-2">Share Ratio</th>
                   <th className="px-3 py-2">Aadhaar Hash</th>
@@ -613,23 +631,25 @@ export const ExtractedFieldsForm: React.FC = () => {
               <tbody className="divide-y divide-slate-800/80">
                 {activeRecord.owners.map((owner, idx) => (
                   <tr key={owner.id || idx} className="hover:bg-slate-900/40">
-                    <td className="px-3 py-2 min-w-[220px]">
+                    <td className="px-3 py-2 min-w-[240px]">
                       {/* Primary English Name Input */}
                       <input
                         type="text"
                         value={owner.name}
                         onChange={(e) => handleOwnerChange(idx, 'name', e.target.value)}
-                        placeholder="Owner Name in English (e.g. Ramesh Chandra Sharma)"
+                        placeholder="Owner Name in English (e.g. Suryansh Mittal)"
                         className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-medium focus:ring-1 focus:ring-emerald-500"
                       />
                       {/* Secondary Vernacular Name Input */}
                       <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] text-slate-500 font-mono shrink-0">Vernacular:</span>
+                        <span className="text-[10px] text-teal-400/80 font-mono shrink-0 flex items-center gap-0.5">
+                          <span>Vernacular:</span>
+                        </span>
                         <input
                           type="text"
                           value={owner.vernacularName || ''}
                           onChange={(e) => handleOwnerChange(idx, 'vernacularName', e.target.value)}
-                          placeholder="क्षेत्रीय भाषा (e.g. रमेश चंद्र शर्मा)"
+                          placeholder="क्षेत्रीय भाषा (e.g. सूर्यांश मित्तल)"
                           className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-teal-300 font-sans focus:ring-1 focus:ring-emerald-500"
                         />
                       </div>
