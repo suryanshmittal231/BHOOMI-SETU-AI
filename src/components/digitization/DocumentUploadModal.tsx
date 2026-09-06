@@ -4,6 +4,7 @@ import { DocumentType, LanguageCode, LandRecord, LandClassification } from '../.
 import {
   UploadCloud,
   FileText,
+  FileCheck,
   Sparkles,
   X,
   CheckCircle2,
@@ -12,6 +13,16 @@ import {
   Sliders,
   AlertCircle
 } from 'lucide-react';
+
+import {
+  getAvailableStates,
+  getDistrictsForState,
+  getTehsilsForDistrict,
+  getVillagesForTehsil,
+  normalizeStateName,
+  normalizeDistrictName,
+  normalizeTehsilName
+} from '../../data/administrativeHierarchy';
 
 interface DocumentUploadModalProps {
   isOpen: boolean;
@@ -25,9 +36,10 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
   const [docLanguage, setDocLanguage] = useState<LanguageCode>('hi');
   const [fileName, setFileName] = useState<string>('Scanned_Land_Record_2024.pdf');
   const [fileSize, setFileSize] = useState<number>(2450000);
-  const [district, setDistrict] = useState<string>('Lucknow');
   const [state, setState] = useState<string>('Uttar Pradesh');
-  const [village, setVillage] = useState<string>('Bhaupur');
+  const [district, setDistrict] = useState<string>('Lucknow');
+  const [tehsil, setTehsil] = useState<string>('Mohanlalganj');
+  const [village, setVillage] = useState<string>('Bhaupur (भाऊपुर)');
   const [khasraNo, setKhasraNo] = useState<string>('412/1');
   const [khataNo, setKhataNo] = useState<string>('00219');
   const [ownerName, setOwnerName] = useState<string>('Vikram Singh Yadav');
@@ -48,7 +60,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
       setDocLanguage('hi');
       setState('Uttar Pradesh');
       setDistrict('Varanasi');
-      setVillage('Shivpur');
+      setTehsil('Pindra');
+      setVillage('Phulpur (फूलपुर)');
       setKhasraNo('289/2');
       setKhataNo('00188');
       setOwnerName('Radheshyam Maurya');
@@ -61,7 +74,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
       setDocLanguage('mr');
       setState('Maharashtra');
       setDistrict('Nashik');
-      setVillage('Dindori');
+      setTehsil('Niphad');
+      setVillage('Pimpalgaon Baswant (पिंपळगाव बसवंत)');
       setKhasraNo('145/3');
       setKhataNo('92');
       setOwnerName('Santosh Bhaurao Gaikwad');
@@ -74,7 +88,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
       setDocLanguage('ta');
       setState('Tamil Nadu');
       setDistrict('Madurai');
-      setVillage('Melur');
+      setTehsil('Melur');
+      setVillage('Kottampatti (கொட்டாம்பட்டி)');
       setKhasraNo('312/1A');
       setKhataNo('1890');
       setOwnerName('K. Ramasamy');
@@ -86,8 +101,9 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
       setDocType('JAMABANDI');
       setDocLanguage('hi');
       setState('Uttar Pradesh');
-      setDistrict('Moradabad');
-      setVillage('Chandausi');
+      setDistrict('Rampur');
+      setTehsil('Bilaspur');
+      setVillage('Rampur Khas (रामपुर खास)');
       setKhasraNo('88/4');
       setKhataNo('00341');
       setOwnerName('Irfan Habib & Javed Habib');
@@ -214,39 +230,72 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
     }, 800);
   };
 
+  const availableStates = getAvailableStates();
+  const normState = normalizeStateName(state);
+  const availableDistricts = getDistrictsForState(normState);
+  const normDist = normalizeDistrictName(normState, district);
+  const availableTehsils = getTehsilsForDistrict(normState, normDist);
+  const normTeh = normalizeTehsilName(normState, normDist, tehsil);
+  const availableVillages = getVillagesForTehsil(normState, normDist, normTeh);
+
+  const handleStateChange = (newState: string) => {
+    setState(newState);
+    const dists = getDistrictsForState(newState);
+    const newDist = dists[0]?.key || '';
+    setDistrict(newDist);
+    const tehs = getTehsilsForDistrict(newState, newDist);
+    const newTeh = tehs[0]?.key || '';
+    setTehsil(newTeh);
+    const vills = getVillagesForTehsil(newState, newDist, newTeh);
+    setVillage(vills[0] || '');
+  };
+
+  const handleDistrictChange = (newDist: string) => {
+    setDistrict(newDist);
+    const tehs = getTehsilsForDistrict(normState, newDist);
+    const newTeh = tehs[0]?.key || '';
+    setTehsil(newTeh);
+    const vills = getVillagesForTehsil(normState, newDist, newTeh);
+    setVillage(vills[0] || '');
+  };
+
+  const handleTehsilChange = (newTeh: string) => {
+    setTehsil(newTeh);
+    const vills = getVillagesForTehsil(normState, normDist, newTeh);
+    setVillage(vills[0] || '');
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-200 animate-fadeIn">
+      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scaleUp">
         {/* Modal Header */}
         <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl">
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
-                Upload & Ingest New Land Record
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                AI Optical Character Recognition & Multilingual LayoutLMv3 Pipeline
-              </p>
+              <h3 className="text-base font-bold text-white">Ingest & Digitize Land Record Document</h3>
+              <p className="text-xs text-slate-400">DILRMP-compliant layout classification and OCR pipeline</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-5 text-xs">
-          {/* Quick Demo Sample Picker Chips */}
+        <div className="p-6 space-y-5 overflow-y-auto flex-1 text-xs text-slate-200">
+          {/* Quick Demo Presets Shelf */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
-              1. Or Choose an Authentic Indian Revenue Sample:
-            </label>
+            <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
+              <span>Instant SIH 1-Click Evaluation Presets:</span>
+              <span className="text-[10px] text-emerald-400 font-mono">Verified Samples</span>
+            </div>
+
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
@@ -318,24 +367,28 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
                 Drag & drop your scanned land record PDF / Image
               </div>
               <p className="text-[11px] text-slate-400">
-                Supports PDF, TIFF, PNG, JPG (Auto-Deskewed and Binarized)
+                Supports Multi-page PDF, TIFF, High-Res JPG/PNG (Up to 25MB)
               </p>
-              {fileName && (
-                <div className="inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-500/30 text-[11px] font-mono">
-                  <FileText className="w-3.5 h-3.5" /> {fileName} ({(fileSize / 1024).toFixed(1)} KB)
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Form Fields: Document Details */}
+          {/* File Name Preview Pill */}
+          <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div className="flex items-center space-x-2 truncate">
+              <FileCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="font-mono text-xs text-white truncate">{fileName}</span>
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">{(fileSize / (1024 * 1024)).toFixed(2)} MB</span>
+          </div>
+
+          {/* Form Fields: Document Details with Cascading Dropdowns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Document Format</label>
               <select
                 value={docType}
                 onChange={(e) => setDocType(e.target.value as DocumentType)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value="KHATAUNI">Khatauni (RoR)</option>
                 <option value="SATBARA_7_12">7/12 Satbara Extract</option>
@@ -351,7 +404,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
               <select
                 value={docLanguage}
                 onChange={(e) => setDocLanguage(e.target.value as LanguageCode)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value="hi">हिन्दी (Hindi)</option>
                 <option value="mr">मराठी (Marathi)</option>
@@ -361,34 +414,83 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
               </select>
             </div>
 
+            {/* Territory / State Dropdown */}
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Territory / State</label>
-              <input
-                type="text"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
+              <select
+                value={normState}
+                onChange={(e) => handleStateChange(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                {availableStates.map((s) => (
+                  <option key={s.key} value={s.key} className="bg-slate-900 text-white">
+                    {s.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* District Dropdown */}
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">District</label>
-              <input
-                type="text"
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
+              <select
+                value={availableDistricts.some(d => d.key === district) ? normDist : district}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                {!availableDistricts.some(d => d.key === normDist) && district && (
+                  <option value={district} className="bg-slate-900 text-amber-300">
+                    {district} (Custom)
+                  </option>
+                )}
+                {availableDistricts.map((d) => (
+                  <option key={d.key} value={d.key} className="bg-slate-900 text-white">
+                    {d.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* Tehsil / Taluk Dropdown */}
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Tehsil / Taluk</label>
+              <select
+                value={availableTehsils.some(t => t.key === tehsil) ? normTeh : tehsil}
+                onChange={(e) => handleTehsilChange(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                {!availableTehsils.some(t => t.key === normTeh) && tehsil && (
+                  <option value={tehsil} className="bg-slate-900 text-amber-300">
+                    {tehsil} (Custom)
+                  </option>
+                )}
+                {availableTehsils.map((t) => (
+                  <option key={t.key} value={t.key} className="bg-slate-900 text-white">
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Revenue Village Dropdown */}
             <div>
               <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Revenue Village</label>
-              <input
-                type="text"
+              <select
                 value={village}
                 onChange={(e) => setVillage(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              >
+                {!availableVillages.includes(village) && village && (
+                  <option value={village} className="bg-slate-900 text-amber-300">
+                    {village} (Custom)
+                  </option>
+                )}
+                {availableVillages.map((v) => (
+                  <option key={v} value={v} className="bg-slate-900 text-white">
+                    {v}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { LandClassification, LandOwner, AreaUnit } from '../../types/landRecord';
 import { convertArea, parseShareFraction, UNIT_LABELS } from '../../utils/areaConverter';
+import {
+  getAvailableStates,
+  getDistrictsForState,
+  getTehsilsForDistrict,
+  getVillagesForTehsil,
+  normalizeStateName,
+  normalizeDistrictName,
+  normalizeTehsilName
+} from '../../data/administrativeHierarchy';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -17,7 +26,10 @@ import {
   Scale,
   Calendar,
   Layers,
-  ArrowRight
+  ArrowRight,
+  MapPin,
+  ListFilter,
+  Edit3
 } from 'lucide-react';
 
 export const ExtractedFieldsForm: React.FC = () => {
@@ -40,6 +52,7 @@ export const ExtractedFieldsForm: React.FC = () => {
   const [rejectReason, setRejectReason] = useState('');
   const [patwariNotes, setPatwariNotes] = useState('');
   const [showSuccessToast, setShowSuccessToast] = useState<string | null>(null);
+  const [isManualLocationInput, setIsManualLocationInput] = useState(false);
 
   if (!activeRecord) {
     return <div className="p-8 text-center text-slate-500">No record selected.</div>;
@@ -112,6 +125,76 @@ export const ExtractedFieldsForm: React.FC = () => {
     updateActiveRecord({ owners: fixedOwners });
     setShowSuccessToast('Co-owner shares re-normalized proportionally to 100.00%');
     setTimeout(() => setShowSuccessToast(null), 3000);
+  };
+
+  // Administrative Hierarchy Cascading Computations
+  const availableStates = useMemo(() => getAvailableStates(), []);
+
+  const normState = useMemo(() => normalizeStateName(activeRecord.state), [activeRecord.state]);
+  const availableDistricts = useMemo(() => getDistrictsForState(normState), [normState]);
+
+  const normDistrict = useMemo(
+    () => normalizeDistrictName(normState, activeRecord.district),
+    [normState, activeRecord.district]
+  );
+  const availableTehsils = useMemo(
+    () => getTehsilsForDistrict(normState, normDistrict),
+    [normState, normDistrict]
+  );
+
+  const normTehsil = useMemo(
+    () => normalizeTehsilName(normState, normDistrict, activeRecord.tehsil),
+    [normState, normDistrict, activeRecord.tehsil]
+  );
+  const availableVillages = useMemo(
+    () => getVillagesForTehsil(normState, normDistrict, normTehsil),
+    [normState, normDistrict, normTehsil]
+  );
+
+  // Administrative Hierarchy Selection Handlers
+  const handleStateSelect = (newState: string) => {
+    const districts = getDistrictsForState(newState);
+    const newDistrict = districts[0]?.key || '';
+    const tehsils = getTehsilsForDistrict(newState, newDistrict);
+    const newTehsil = tehsils[0]?.key || '';
+    const villages = getVillagesForTehsil(newState, newDistrict, newTehsil);
+    const newVillage = villages[0] || '';
+
+    updateActiveRecord({
+      state: newState,
+      district: newDistrict,
+      tehsil: newTehsil,
+      revenueVillage: newVillage
+    });
+  };
+
+  const handleDistrictSelect = (newDistrict: string) => {
+    const tehsils = getTehsilsForDistrict(normState, newDistrict);
+    const newTehsil = tehsils[0]?.key || '';
+    const villages = getVillagesForTehsil(normState, newDistrict, newTehsil);
+    const newVillage = villages[0] || '';
+
+    updateActiveRecord({
+      district: newDistrict,
+      tehsil: newTehsil,
+      revenueVillage: newVillage
+    });
+  };
+
+  const handleTehsilSelect = (newTehsil: string) => {
+    const villages = getVillagesForTehsil(normState, normDistrict, newTehsil);
+    const newVillage = villages[0] || '';
+
+    updateActiveRecord({
+      tehsil: newTehsil,
+      revenueVillage: newVillage
+    });
+  };
+
+  const handleVillageSelect = (newVillage: string) => {
+    updateActiveRecord({
+      revenueVillage: newVillage
+    });
   };
 
   // Workflow Handlers
@@ -227,51 +310,178 @@ export const ExtractedFieldsForm: React.FC = () => {
           </div>
         )}
 
-        {/* Section 1: Administrative Hierarchy */}
+        {/* Section 1: Administrative Hierarchy & Location Dropdowns */}
         <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80 space-y-3">
-          <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
-            <Building className="w-3.5 h-3.5 text-emerald-400" />
-            {t('adminHierarchy')}
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
+              <Building className="w-3.5 h-3.5 text-emerald-400" />
+              {t('adminHierarchy')}
+            </div>
+
+            {/* Toggle between Cascading Dropdowns and Manual Freeform Edit */}
+            <button
+              type="button"
+              onClick={() => setIsManualLocationInput(!isManualLocationInput)}
+              className="text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1.5 transition-colors"
+              title="Toggle between dropdown directory and custom text entry"
+            >
+              {isManualLocationInput ? (
+                <>
+                  <ListFilter className="w-3 h-3 text-emerald-400" />
+                  <span>Use Dropdown Directory</span>
+                </>
+              ) : (
+                <>
+                  <Edit3 className="w-3 h-3 text-amber-400" />
+                  <span>Manual Text Input</span>
+                </>
+              )}
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">{t('stateLabel')}</label>
-              <input
-                type="text"
-                value={activeRecord.state}
-                onChange={(e) => updateRecordField('state', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
+          {isManualLocationInput ? (
+            /* Freeform Text Inputs */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">{t('stateLabel')}</label>
+                <input
+                  type="text"
+                  value={activeRecord.state}
+                  onChange={(e) => updateRecordField('state', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">{t('districtLabel')}</label>
+                <input
+                  type="text"
+                  value={activeRecord.district}
+                  onChange={(e) => updateRecordField('district', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">{t('tehsilLabel')}</label>
+                <input
+                  type="text"
+                  value={activeRecord.tehsil}
+                  onChange={(e) => updateRecordField('tehsil', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1">{t('villageLabel')}</label>
+                <input
+                  type="text"
+                  value={activeRecord.revenueVillage}
+                  onChange={(e) => updateRecordField('revenueVillage', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                />
+              </div>
             </div>
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">{t('districtLabel')}</label>
-              <input
-                type="text"
-                value={activeRecord.district}
-                onChange={(e) => updateRecordField('district', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
+          ) : (
+            /* Cascading Interactive Dropdowns */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* 1. State Dropdown */}
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 flex items-center justify-between">
+                  <span>{t('stateLabel')}</span>
+                  <span className="text-[9px] text-emerald-400 font-mono">DILRMP</span>
+                </label>
+                <select
+                  value={normState}
+                  onChange={(e) => handleStateSelect(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 font-medium cursor-pointer"
+                >
+                  {availableStates.map((s) => (
+                    <option key={s.key} value={s.key} className="bg-slate-900 text-white">
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 2. District Dropdown */}
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 flex items-center justify-between">
+                  <span>{t('districtLabel')}</span>
+                  <span className="text-[9px] text-teal-400/80 font-mono">({availableDistricts.length} Districts)</span>
+                </label>
+                <select
+                  value={
+                    availableDistricts.some(d => d.key === activeRecord.district || d.label.includes(activeRecord.district))
+                      ? normDistrict
+                      : (activeRecord.district || normDistrict)
+                  }
+                  onChange={(e) => handleDistrictSelect(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 font-medium cursor-pointer"
+                >
+                  {!availableDistricts.some(d => d.key === normDistrict) && activeRecord.district && (
+                    <option value={activeRecord.district} className="bg-slate-900 text-amber-300 font-bold">
+                      {activeRecord.district} (Extracted)
+                    </option>
+                  )}
+                  {availableDistricts.map((d) => (
+                    <option key={d.key} value={d.key} className="bg-slate-900 text-white">
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 3. Tehsil / Taluk Dropdown */}
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 flex items-center justify-between">
+                  <span>{t('tehsilLabel')}</span>
+                  <span className="text-[9px] text-cyan-400/80 font-mono">({availableTehsils.length} Tehsils)</span>
+                </label>
+                <select
+                  value={
+                    availableTehsils.some(t => t.key === activeRecord.tehsil || t.label.includes(activeRecord.tehsil))
+                      ? normTehsil
+                      : (activeRecord.tehsil || normTehsil)
+                  }
+                  onChange={(e) => handleTehsilSelect(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 font-medium cursor-pointer"
+                >
+                  {!availableTehsils.some(t => t.key === normTehsil) && activeRecord.tehsil && (
+                    <option value={activeRecord.tehsil} className="bg-slate-900 text-amber-300 font-bold">
+                      {activeRecord.tehsil} (Extracted)
+                    </option>
+                  )}
+                  {availableTehsils.map((t) => (
+                    <option key={t.key} value={t.key} className="bg-slate-900 text-white">
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 4. Revenue Village Dropdown */}
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 flex items-center justify-between">
+                  <span>{t('villageLabel')}</span>
+                  <span className="text-[9px] text-emerald-400/80 font-mono">({availableVillages.length} Villages)</span>
+                </label>
+                <select
+                  value={activeRecord.revenueVillage}
+                  onChange={(e) => handleVillageSelect(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500 font-medium cursor-pointer"
+                >
+                  {!availableVillages.includes(activeRecord.revenueVillage) && activeRecord.revenueVillage && (
+                    <option value={activeRecord.revenueVillage} className="bg-slate-900 text-amber-300 font-bold">
+                      {activeRecord.revenueVillage} (Extracted)
+                    </option>
+                  )}
+                  {availableVillages.map((v) => (
+                    <option key={v} value={v} className="bg-slate-900 text-white">
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">{t('tehsilLabel')}</label>
-              <input
-                type="text"
-                value={activeRecord.tehsil}
-                onChange={(e) => updateRecordField('tehsil', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-400 block mb-1">{t('villageLabel')}</label>
-              <input
-                type="text"
-                value={activeRecord.revenueVillage}
-                onChange={(e) => updateRecordField('revenueVillage', e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Section 2: Land Identifiers & Universal Area Converter */}
