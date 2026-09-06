@@ -502,6 +502,38 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:ring-1 focus:ring-emerald-500"
               />
             </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Khata Number</label>
+              <input
+                type="text"
+                value={khataNo}
+                onChange={(e) => setKhataNo(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono font-bold focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Owner Name (English)</label>
+              <input
+                type="text"
+                value={ownerName}
+                onChange={(e) => setOwnerName(e.target.value)}
+                placeholder="e.g. Vikram Singh Yadav"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Father / Spouse Name</label>
+              <input
+                type="text"
+                value={fatherName}
+                onChange={(e) => setFatherName(e.target.value)}
+                placeholder="e.g. Harishchandra Yadav"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
           </div>
         </div>
 

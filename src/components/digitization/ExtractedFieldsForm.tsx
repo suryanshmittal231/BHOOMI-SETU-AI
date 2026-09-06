@@ -613,20 +613,34 @@ export const ExtractedFieldsForm: React.FC = () => {
               <tbody className="divide-y divide-slate-800/80">
                 {activeRecord.owners.map((owner, idx) => (
                   <tr key={owner.id || idx} className="hover:bg-slate-900/40">
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 min-w-[220px]">
+                      {/* Primary English Name Input */}
                       <input
                         type="text"
-                        value={owner.vernacularName || owner.name}
+                        value={owner.name}
                         onChange={(e) => handleOwnerChange(idx, 'name', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"
+                        placeholder="Owner Name in English (e.g. Ramesh Chandra Sharma)"
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-medium focus:ring-1 focus:ring-emerald-500"
                       />
+                      {/* Secondary Vernacular Name Input */}
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-slate-500 font-mono shrink-0">Vernacular:</span>
+                        <input
+                          type="text"
+                          value={owner.vernacularName || ''}
+                          onChange={(e) => handleOwnerChange(idx, 'vernacularName', e.target.value)}
+                          placeholder="क्षेत्रीय भाषा (e.g. रमेश चंद्र शर्मा)"
+                          className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-teal-300 font-sans focus:ring-1 focus:ring-emerald-500"
+                        />
+                      </div>
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 min-w-[180px]">
                       <input
                         type="text"
                         value={owner.fatherOrSpouseName}
                         onChange={(e) => handleOwnerChange(idx, 'fatherOrSpouseName', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-white"
+                        placeholder="Father / Spouse Name"
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:ring-1 focus:ring-emerald-500"
                       />
                     </td>
                     <td className="px-3 py-2 w-32">
