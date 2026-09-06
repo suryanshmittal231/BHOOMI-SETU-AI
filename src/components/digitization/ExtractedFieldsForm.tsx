@@ -1,7 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { LandClassification, LandOwner, AreaUnit } from '../../types/landRecord';
-import { convertArea, parseShareFraction, formatShareRatioWithPercentage, UNIT_LABELS } from '../../utils/areaConverter';
+import {
+  convertArea,
+  parseShareFraction,
+  formatShareRatioWithPercentage,
+  extractFractionAndPercentage,
+  updateShareRatioFromPercentage,
+  updateShareRatioFromFraction,
+  UNIT_LABELS
+} from '../../utils/areaConverter';
 import {
   getAvailableStates,
   getDistrictsForState,
@@ -108,6 +116,36 @@ export const ExtractedFieldsForm: React.FC = () => {
     updateActiveRecord({ owners: updatedOwners });
   };
 
+  // Dedicated bidirectional handler for editing fraction (updates % automatically)
+  const handleOwnerFractionChange = (index: number, fracValue: string) => {
+    const updatedOwners = [...activeRecord.owners];
+    const currentOwner = updatedOwners[index];
+    const res = updateShareRatioFromFraction(fracValue);
+
+    updatedOwners[index] = {
+      ...currentOwner,
+      shareRatio: res.shareRatio,
+      shareFraction: res.fraction
+    };
+
+    updateActiveRecord({ owners: updatedOwners });
+  };
+
+  // Dedicated bidirectional handler for editing percentage (updates fraction automatically)
+  const handleOwnerPercentageChange = (index: number, pctValue: string) => {
+    const updatedOwners = [...activeRecord.owners];
+    const currentOwner = updatedOwners[index];
+    const res = updateShareRatioFromPercentage(pctValue);
+
+    updatedOwners[index] = {
+      ...currentOwner,
+      shareRatio: res.shareRatio,
+      shareFraction: res.fraction
+    };
+
+    updateActiveRecord({ owners: updatedOwners });
+  };
+
   // Add new co-owner
   const handleAddOwner = () => {
     const newOwner: LandOwner = {
@@ -116,8 +154,8 @@ export const ExtractedFieldsForm: React.FC = () => {
       vernacularName: 'नया खातेदार',
       fatherOrSpouseName: 'Father Name',
       relationType: 'S/O',
-      shareRatio: '0.00',
-      shareFraction: 0,
+      shareRatio: '1/4 (25%)',
+      shareFraction: 0.25,
       residence: activeRecord.revenueVillage
     };
     updateActiveRecord({ owners: [...activeRecord.owners, newOwner] });
@@ -132,13 +170,12 @@ export const ExtractedFieldsForm: React.FC = () => {
   // Auto-Fix Share Ratio discrepancy
   const handleAutoFixShares = () => {
     if (activeRecord.owners.length === 0) return;
-    const equalShare = Number((1 / activeRecord.owners.length).toFixed(4));
-    const equalShareStr = `${equalShare * 100}% (1/${activeRecord.owners.length})`;
+    const shareRes = updateShareRatioFromFraction(`1/${activeRecord.owners.length}`);
 
     const fixedOwners = activeRecord.owners.map(o => ({
       ...o,
-      shareRatio: equalShareStr,
-      shareFraction: equalShare
+      shareRatio: shareRes.shareRatio,
+      shareFraction: shareRes.fraction
     }));
 
     updateActiveRecord({ owners: fixedOwners });
@@ -608,6 +645,16 @@ export const ExtractedFieldsForm: React.FC = () => {
                 Total Share: {(totalShareSum * 100).toFixed(1)}% {isShareValid ? '(Balanced 100%)' : '(Discrepancy)'}
               </span>
 
+              {!isShareValid && (
+                <button
+                  onClick={handleAutoFixShares}
+                  className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[10px] font-semibold px-2 py-0.5 rounded border border-amber-500/40 flex items-center gap-1 transition"
+                  title="Auto-distribute shares equally to 100%"
+                >
+                  <Sparkles className="w-3 h-3" /> Auto-Fix
+                </button>
+              )}
+
               <button
                 onClick={handleAddOwner}
                 className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-medium px-2 py-1 rounded-lg border border-slate-700 flex items-center gap-1"
@@ -624,78 +671,105 @@ export const ExtractedFieldsForm: React.FC = () => {
                 <tr>
                   <th className="px-3 py-2">Owner Name (English / Vernacular)</th>
                   <th className="px-3 py-2">Father / Spouse Name</th>
-                  <th className="px-3 py-2">Share Ratio</th>
+                  <th className="px-3 py-2 min-w-[210px]">Share Ratio (Fraction ⇄ %)</th>
                   <th className="px-3 py-2">Aadhaar Hash</th>
                   <th className="px-3 py-2 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
-                {activeRecord.owners.map((owner, idx) => (
-                  <tr key={owner.id || idx} className="hover:bg-slate-900/40">
-                    <td className="px-3 py-2 min-w-[240px]">
-                      {/* Primary English Name Input */}
-                      <input
-                        type="text"
-                        value={owner.name}
-                        onChange={(e) => handleOwnerChange(idx, 'name', e.target.value)}
-                        placeholder="Owner Name in English (e.g. Suryansh Mittal)"
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-medium focus:ring-1 focus:ring-emerald-500"
-                      />
-                      {/* Secondary Vernacular Name Input */}
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span className="text-[10px] text-teal-400/80 font-mono shrink-0 flex items-center gap-0.5">
-                          <span>Vernacular:</span>
-                        </span>
+                {activeRecord.owners.map((owner, idx) => {
+                  const parsedShare = extractFractionAndPercentage(owner.shareRatio);
+                  return (
+                    <tr key={owner.id || idx} className="hover:bg-slate-900/40">
+                      <td className="px-3 py-2 min-w-[240px]">
+                        {/* Primary English Name Input */}
                         <input
                           type="text"
-                          value={owner.vernacularName || ''}
-                          onChange={(e) => handleOwnerChange(idx, 'vernacularName', e.target.value)}
-                          placeholder="क्षेत्रीय भाषा (e.g. सूर्यांश मित्तल)"
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-teal-300 font-sans focus:ring-1 focus:ring-emerald-500"
+                          value={owner.name}
+                          onChange={(e) => handleOwnerChange(idx, 'name', e.target.value)}
+                          placeholder="Owner Name in English (e.g. Suryansh Mittal)"
+                          className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-medium focus:ring-1 focus:ring-emerald-500"
                         />
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 min-w-[180px]">
-                      <input
-                        type="text"
-                        value={owner.fatherOrSpouseName}
-                        onChange={(e) => handleOwnerChange(idx, 'fatherOrSpouseName', e.target.value)}
-                        placeholder="Father / Spouse Name"
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </td>
-                    <td className="px-3 py-2 w-36">
-                      <input
-                        type="text"
-                        value={owner.shareRatio}
-                        onChange={(e) => handleOwnerChange(idx, 'shareRatio', e.target.value)}
-                        onBlur={(e) => handleOwnerChange(idx, 'shareRatio', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-emerald-400 font-mono font-bold focus:ring-1 focus:ring-emerald-500"
-                        placeholder="e.g. 1/4 (25%)"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        value={owner.aadhaarHash || ''}
-                        onChange={(e) => handleOwnerChange(idx, 'aadhaarHash', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300 font-mono"
-                        placeholder="XXXX-XXXX-1234"
-                      />
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      {activeRecord.owners.length > 1 && (
-                        <button
-                          onClick={() => handleRemoveOwner(idx)}
-                          className="text-rose-400 hover:text-rose-300 p-1"
-                          title="Remove Owner"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        {/* Secondary Vernacular Name Input */}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[10px] text-teal-400/80 font-mono shrink-0 flex items-center gap-0.5">
+                            <span>Vernacular:</span>
+                          </span>
+                          <input
+                            type="text"
+                            value={owner.vernacularName || ''}
+                            onChange={(e) => handleOwnerChange(idx, 'vernacularName', e.target.value)}
+                            placeholder="क्षेत्रीय भाषा (e.g. सूर्यांश मित्तल)"
+                            className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-0.5 text-[11px] text-teal-300 font-sans focus:ring-1 focus:ring-emerald-500"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 min-w-[180px]">
+                        <input
+                          type="text"
+                          value={owner.fatherOrSpouseName}
+                          onChange={(e) => handleOwnerChange(idx, 'fatherOrSpouseName', e.target.value)}
+                          placeholder="Father / Spouse Name"
+                          className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white focus:ring-1 focus:ring-emerald-500"
+                        />
+                      </td>
+                      <td className="px-3 py-2 min-w-[210px]">
+                        <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-700/80 rounded-lg p-1 shadow-inner">
+                          {/* Fraction input */}
+                          <div className="flex-1 flex items-center bg-slate-950 border border-slate-800 rounded px-2 py-1 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500/40 transition">
+                            <input
+                              type="text"
+                              value={parsedShare.fractionStr}
+                              onChange={(e) => handleOwnerFractionChange(idx, e.target.value)}
+                              placeholder="1/4"
+                              title="Fractional Share (e.g. 1/4, 1/2, 2/3, 3/4)"
+                              className="w-full bg-transparent text-xs text-emerald-400 font-mono font-bold focus:outline-none text-center"
+                            />
+                          </div>
+
+                          {/* Bidirectional Sync Indicator */}
+                          <span className="text-[11px] text-slate-500 font-bold select-none px-0.5" title="Bidirectional live sync between Fraction and Percentage">⇄</span>
+
+                          {/* Percentage input */}
+                          <div className="flex-1 flex items-center bg-slate-950 border border-slate-800 rounded px-1.5 py-1 focus-within:border-teal-400 focus-within:ring-1 focus-within:ring-teal-400/40 transition">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0"
+                              max="100"
+                              value={parsedShare.percentageStr}
+                              onChange={(e) => handleOwnerPercentageChange(idx, e.target.value)}
+                              placeholder="25"
+                              title="Percentage Share (e.g. 25, 50, 33.33, 75)"
+                              className="w-full bg-transparent text-xs text-teal-300 font-mono font-bold focus:outline-none text-right pr-0.5"
+                            />
+                            <span className="text-[10px] text-teal-400 font-bold select-none">%</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="text"
+                          value={owner.aadhaarHash || ''}
+                          onChange={(e) => handleOwnerChange(idx, 'aadhaarHash', e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-300 font-mono"
+                          placeholder="XXXX-XXXX-1234"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-right">
+                        {activeRecord.owners.length > 1 && (
+                          <button
+                            onClick={() => handleRemoveOwner(idx)}
+                            className="text-rose-400 hover:text-rose-300 p-1"
+                            title="Remove Owner"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
