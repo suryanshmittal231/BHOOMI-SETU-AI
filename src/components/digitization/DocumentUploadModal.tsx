@@ -17,7 +17,8 @@ import {
   FolderOpen,
   RefreshCw,
   Eye,
-  Check
+  Check,
+  ArrowLeft
 } from 'lucide-react';
 
 import {
@@ -800,16 +801,21 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
           <div className="flex items-center space-x-3">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold transition"
+              onClick={() => {
+                setIsUploading(false);
+                onClose();
+                setActiveTab('DASHBOARD');
+              }}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-medium text-xs border border-slate-700 flex items-center gap-1.5 transition"
             >
-              Cancel
+              <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
+              Cancel & Return to Executive Command
             </button>
             <button
               type="button"
               onClick={handleStartDigitization}
               disabled={isUploading}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold shadow-lg shadow-emerald-950/60 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/60 flex items-center gap-2 transition-all transform hover:-translate-y-0.5 disabled:opacity-50"
             >
               {isUploading ? (
                 <>

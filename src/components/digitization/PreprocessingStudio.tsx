@@ -16,7 +16,8 @@ import {
   RefreshCw,
   Split,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  ArrowLeft
 } from 'lucide-react';
 
 export const PreprocessingStudio: React.FC = () => {
@@ -98,22 +99,33 @@ export const PreprocessingStudio: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick Sample Selector */}
-        <div className="flex items-center gap-2 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
-          <span className="text-xs text-slate-400 px-2 font-medium">Sample:</span>
-          {records.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setActiveRecordId(r.id)}
-              className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
-                activeRecord.id === r.id
-                  ? 'bg-emerald-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {r.documentLanguage.toUpperCase()} - {r.documentType.slice(0, 7)}
-            </button>
-          ))}
+        {/* Top Actions & Quick Sample Selector */}
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => setActiveTab('DASHBOARD')}
+            className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 transition font-medium shadow-sm"
+            title="Cancel / Return to Executive Command"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Executive Command
+          </button>
+
+          <div className="flex items-center gap-2 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800">
+            <span className="text-xs text-slate-400 px-2 font-medium">Sample:</span>
+            {records.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setActiveRecordId(r.id)}
+                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                  activeRecord.id === r.id
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {r.documentLanguage.toUpperCase()} - {r.documentType.slice(0, 7)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -251,7 +263,7 @@ export const PreprocessingStudio: React.FC = () => {
           </div>
 
           {/* Action Trigger Button */}
-          <div className="pt-3 border-t border-slate-800">
+          <div className="pt-3 border-t border-slate-800 space-y-2">
             <button
               onClick={handleRunOcr}
               disabled={isProcessing}
@@ -268,6 +280,15 @@ export const PreprocessingStudio: React.FC = () => {
                   {t('applyAndRunOcr')}
                 </>
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('DASHBOARD')}
+              className="w-full py-2 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white font-medium text-xs border border-slate-700/80 flex items-center justify-center gap-1.5 transition"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-slate-400" />
+              Cancel & Return to Executive Command
             </button>
           </div>
         </div>

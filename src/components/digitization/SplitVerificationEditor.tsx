@@ -9,7 +9,8 @@ import {
   FileText,
   Sliders,
   Sparkles,
-  ArrowLeftRight
+  ArrowLeftRight,
+  ArrowLeft
 } from 'lucide-react';
 
 export const SplitVerificationEditor: React.FC = () => {
@@ -20,7 +21,16 @@ export const SplitVerificationEditor: React.FC = () => {
       {/* Top Document Shelf Bar */}
       <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-xl px-4 py-2 text-xs shrink-0">
         <div className="flex items-center space-x-3 overflow-x-auto py-1">
-          <span className="text-slate-400 font-semibold uppercase text-[10px] tracking-wider shrink-0 flex items-center gap-1">
+          <button
+            onClick={() => setActiveTab('DASHBOARD')}
+            className="text-[11px] bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition-all shrink-0 font-medium shadow-sm"
+            title="Exit verification and return to Executive Command Overview"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Executive Command
+          </button>
+
+          <span className="text-slate-400 font-semibold uppercase text-[10px] tracking-wider shrink-0 flex items-center gap-1 pl-1 border-l border-slate-800">
             <FileText className="w-3.5 h-3.5 text-emerald-400" /> Active Queue:
           </span>
           {records.map((r) => {

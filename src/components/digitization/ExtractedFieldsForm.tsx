@@ -39,6 +39,7 @@ import {
   Calendar,
   Layers,
   ArrowRight,
+  ArrowLeft,
   MapPin,
   ListFilter,
   Edit3
@@ -56,6 +57,7 @@ export const ExtractedFieldsForm: React.FC = () => {
     queueActiveLearningCorrection,
     selectedBoundingBoxId,
     setSelectedBoundingBoxId,
+    setActiveTab,
     t
   } = useLandRecord();
 
@@ -890,6 +892,15 @@ export const ExtractedFieldsForm: React.FC = () => {
       {/* Role-Based Action Footer */}
       <div className="bg-slate-950 p-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setActiveTab('DASHBOARD')}
+            className="text-[11px] bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors font-medium"
+            title="Cancel / Exit Verification and return to Executive Command"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-emerald-400" />
+            Executive Command
+          </button>
+
           <button
             onClick={() => {
               queueActiveLearningCorrection(
