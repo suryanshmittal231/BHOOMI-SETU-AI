@@ -39,10 +39,6 @@ export const ExecutiveDashboard: React.FC = () => {
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold mb-2.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              {t('heroBadge')}
-            </div>
             <h2 className="text-2xl font-extrabold text-white tracking-tight">
               {t('heroTitle')}
             </h2>
