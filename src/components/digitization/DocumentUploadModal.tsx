@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLandRecord } from '../../context/LandRecordContext';
 import { DocumentType, LanguageCode, LandRecord, LandClassification } from '../../types/landRecord';
 import {
@@ -42,6 +43,11 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
   const { addNewRecord, setActiveRecordId, setActiveTab } = useLandRecord();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const [modalMode, setModalMode] = useState<'UPLOAD_PDF' | 'PRESET_SAMPLES'>('UPLOAD_PDF');
   const [docType, setDocType] = useState<DocumentType>('KHATAUNI');
@@ -67,7 +73,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
   const [isUploading, setIsUploading] = useState(false);
   const [selectedDemoPreset, setSelectedDemoPreset] = useState<string>('CUSTOM');
 
-  if (!isOpen) return null;
+  if (!isOpen || !isMounted) return null;
 
   // Process selected or dropped file (PDF / Image)
   const processUploadedFile = (file: File) => {
@@ -372,8 +378,8 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
 
   const isPdf = fileName.toLowerCase().endsWith('.pdf');
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md overflow-y-auto p-2 sm:p-4 md:p-6 flex justify-center items-start sm:items-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-md overflow-y-auto p-3 sm:p-6 flex justify-center items-start sm:items-center">
       <div className="my-auto max-w-2xl w-full bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] animate-scaleUp text-slate-200">
         
         {/* Hidden File Input */}
@@ -821,6 +827,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({ isOpen
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
