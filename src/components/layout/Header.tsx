@@ -128,16 +128,34 @@ export const Header: React.FC = () => {
         {/* Role Switcher, Language & Alert Actions */}
         <div className="flex items-center space-x-2.5">
           {/* Quick Stats Pill */}
-          <div className="hidden xl:flex items-center space-x-2 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 py-1 text-xs">
-            <div className="flex items-center gap-1 text-emerald-400" title="Auto-Validated">
+          <div className="hidden xl:flex items-center space-x-2 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 py-1 text-xs select-none">
+            <button
+              type="button"
+              onClick={() => {
+                const valRec = records.find(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS') || records[0];
+                if (valRec) setActiveRecordId(valRec.id);
+                setActiveTab('SPLIT_VERIFY');
+              }}
+              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline transition cursor-pointer"
+              title="Click to view validated record"
+            >
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{records.filter(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS').length} {t('validatedCount')}</span>
-            </div>
+            </button>
             <span className="text-slate-700">•</span>
-            <div className="flex items-center gap-1 text-amber-400" title="Pending Verification">
+            <button
+              type="button"
+              onClick={() => {
+                const pendRec = records.find(r => r.status === 'VERIFICATION_PENDING') || records[0];
+                if (pendRec) setActiveRecordId(pendRec.id);
+                setActiveTab('SPLIT_VERIFY');
+              }}
+              className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline transition cursor-pointer"
+              title="Click to view pending verification record"
+            >
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>{pendingReviews} {t('pendingCount')}</span>
-            </div>
+            </button>
           </div>
 
           {/* Multilingual Selector */}

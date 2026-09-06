@@ -69,10 +69,17 @@ export const ExecutiveDashboard: React.FC = () => {
       {/* Top 6 KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* Total Processed */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => {
+            if (records[0]) setActiveRecordId(records[0].id);
+            setActiveTab('SPLIT_VERIFY');
+          }}
+          className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-indigo-500/50 hover:bg-slate-900 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to view all land records in HITL Verification"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiMonthly')}</span>
-            <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400">
+            <span className="group-hover:text-indigo-300 transition-colors">{t('kpiMonthly')}</span>
+            <div className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 group-hover:scale-110 transition-transform">
               <FileText className="w-4 h-4" />
             </div>
           </div>
@@ -84,10 +91,14 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
 
         {/* Mean OCR Accuracy */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => setActiveTab('ACTIVE_LEARNING')}
+          className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-emerald-500/50 hover:bg-slate-900 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to view Active Learning OCR accuracy and retraining queue"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiAccuracy')}</span>
-            <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+            <span className="group-hover:text-emerald-300 transition-colors">{t('kpiAccuracy')}</span>
+            <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform">
               <Sparkles className="w-4 h-4" />
             </div>
           </div>
@@ -98,10 +109,18 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
 
         {/* Auto-Validated Pass */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => {
+            const valRec = records.find(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS') || records[0];
+            if (valRec) setActiveRecordId(valRec.id);
+            setActiveTab('SPLIT_VERIFY');
+          }}
+          className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-teal-500/50 hover:bg-slate-900 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to open auto-validated land record"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiAutoRule')}</span>
-            <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400">
+            <span className="group-hover:text-teal-300 transition-colors">{t('kpiAutoRule')}</span>
+            <div className="p-1.5 rounded-lg bg-teal-500/20 text-teal-400 group-hover:scale-110 transition-transform">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
@@ -112,10 +131,18 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
 
         {/* Pending Verification */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => {
+            const pendRec = records.find(r => r.status === 'VERIFICATION_PENDING') || records[0];
+            if (pendRec) setActiveRecordId(pendRec.id);
+            setActiveTab('SPLIT_VERIFY');
+          }}
+          className="bg-slate-900/80 border border-amber-500/30 rounded-xl p-4 shadow-sm hover:border-amber-400 hover:bg-slate-900 hover:shadow-amber-500/10 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to immediately open pending record in Split Verification"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiPending')}</span>
-            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+            <span className="group-hover:text-amber-300 transition-colors font-medium">{t('kpiPending')}</span>
+            <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
@@ -126,10 +153,18 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
 
         {/* Disputed / High Risk */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => {
+            const dispRec = records.find(r => r.status === 'DISPUTED' || (r.validationIssues && r.validationIssues.length > 0)) || records[0];
+            if (dispRec) setActiveRecordId(dispRec.id);
+            setActiveTab('SPLIT_VERIFY');
+          }}
+          className="bg-slate-900/80 border border-rose-500/30 rounded-xl p-4 shadow-sm hover:border-rose-400 hover:bg-slate-900 hover:shadow-rose-500/10 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to immediately open flagged/disputed record in Split Verification"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiDisputes')}</span>
-            <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-400">
+            <span className="group-hover:text-rose-300 transition-colors font-medium">{t('kpiDisputes')}</span>
+            <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-400 group-hover:scale-110 transition-transform">
               <AlertOctagon className="w-4 h-4" />
             </div>
           </div>
@@ -140,15 +175,19 @@ export const ExecutiveDashboard: React.FC = () => {
         </div>
 
         {/* SHA-256 Audit Blocks */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+        <div
+          onClick={() => setActiveTab('AUDIT_LEDGER')}
+          className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-cyan-500/50 hover:bg-slate-900 transition-all cursor-pointer transform hover:-translate-y-0.5 group"
+          title="Click to inspect Blockchain Audit Ledger"
+        >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-            <span>{t('kpiBlockchain')}</span>
-            <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400">
+            <span className="group-hover:text-cyan-300 transition-colors">{t('kpiBlockchain')}</span>
+            <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 group-hover:scale-110 transition-transform">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl font-bold text-cyan-300 font-mono">48,912</div>
-          <div className="text-[11px] text-cyan-400/80 mt-1.5 font-medium">
+          <div className="flex items-center text-[11px] text-cyan-400/80 mt-1.5 font-medium">
             100% Tamper Verified
           </div>
         </div>
