@@ -13,7 +13,8 @@ import {
   AlertTriangle,
   Layers,
   Sparkles,
-  UploadCloud
+  UploadCloud,
+  RotateCcw
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -27,7 +28,8 @@ export const Header: React.FC = () => {
     setSearchQuery,
     records,
     setActiveRecordId,
-    setActiveTab
+    setActiveTab,
+    resetToFactoryDefaults
   } = useLandRecord();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -181,6 +183,19 @@ export const Header: React.FC = () => {
           >
             <UploadCloud className="w-3.5 h-3.5" />
             <span>{t('uploadRecordBtn')}</span>
+          </button>
+
+          {/* Reset Saved Session / Factory Defaults */}
+          <button
+            onClick={() => {
+              if (window.confirm('Reset all land records and changes on this device back to default sample dataset?')) {
+                resetToFactoryDefaults();
+              }
+            }}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition-colors border border-slate-700"
+            title="Reset All Local Changes & Restore Default Records"
+          >
+            <RotateCcw className="w-4 h-4" />
           </button>
 
           {/* Quick Notifications Trigger */}
