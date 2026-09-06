@@ -80,7 +80,7 @@ export const Header: React.FC = () => {
             <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
             {t('immutableAudit')}
           </span>
-          <span className="text-slate-500 hidden md:inline">SIH-2024 Working Prototype</span>
+          <span className="text-slate-500 hidden md:inline">SIH-2026 Working Prototype</span>
         </div>
       </div>
 
