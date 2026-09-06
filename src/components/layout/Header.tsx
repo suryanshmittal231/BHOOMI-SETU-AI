@@ -95,7 +95,6 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold tracking-tight text-white font-sans flex items-center">
                 BHOOMI<span className="text-emerald-400">-SETU</span>
-                <span className="ml-1.5 text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-medium">AI v3.4</span>
               </h1>
             </div>
             <p className="text-[11px] text-slate-400 font-devanagari tracking-wide hidden sm:block">
