@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const CitizenPortalView: React.FC = () => {
-  const { records, setActiveRecordId, setActiveTab, t } = useLandRecord();
+  const { records, setActiveRecordId, setActiveTab, t, userRole } = useLandRecord();
 
   const [searchDistrict, setSearchDistrict] = useState('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -238,17 +238,19 @@ export const CitizenPortalView: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => {
-                  setActiveRecordId(selectedRecordForView.id);
-                  setActiveTab('SPLIT_VERIFY');
-                }}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
-              >
-                Inspect in Officer Verification Studio →
-              </button>
-            </div>
+            {userRole !== 'CITIZEN' && (
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => {
+                    setActiveRecordId(selectedRecordForView.id);
+                    setActiveTab('SPLIT_VERIFY');
+                  }}
+                  className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+                >
+                  Inspect in Officer Verification Studio →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

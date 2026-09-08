@@ -45,7 +45,7 @@ export const Sidebar: React.FC = () => {
       label: t('tabVerify'),
       subLabel: t('tabVerifySub'),
       icon: SplitSquareVertical,
-      badge: pendingCount,
+      badge: userRole === 'CITIZEN' || activeTab === 'CITIZEN_PORTAL' ? undefined : pendingCount,
       badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
     },
     {
@@ -120,7 +120,7 @@ export const Sidebar: React.FC = () => {
           );
         })}
 
-        {disputedCount > 0 && (
+        {activeTab !== 'CITIZEN_PORTAL' && userRole !== 'CITIZEN' && disputedCount > 0 && (
           <div className="pt-2">
             <div 
               onClick={() => setActiveTab('SPLIT_VERIFY')}
@@ -142,14 +142,14 @@ export const Sidebar: React.FC = () => {
       <div className="p-3 border-t border-slate-800/80 bg-slate-950/40 space-y-2">
         <div className="bg-slate-900/90 rounded-lg p-2.5 border border-slate-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div className={`w-2.5 h-2.5 rounded-full ${userRole === 'CITIZEN' ? 'bg-cyan-400' : 'bg-emerald-500'} animate-pulse`}></div>
             <div>
               <div className="text-[11px] font-semibold text-slate-200">{userRole} MODE</div>
-              <div className="text-[9px] text-slate-400">{t('authGovt')}</div>
+              <div className="text-[9px] text-slate-400">{userRole === 'CITIZEN' ? 'Public Portal Access' : t('authGovt')}</div>
             </div>
           </div>
           <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">
-            Gov-Auth
+            {userRole === 'CITIZEN' ? 'Public' : 'Gov-Auth'}
           </span>
         </div>
 

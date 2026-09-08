@@ -27,6 +27,7 @@ export const Header: React.FC = () => {
     searchQuery, 
     setSearchQuery,
     records,
+    activeTab,
     setActiveRecordId,
     setActiveTab,
     resetToFactoryDefaults
@@ -38,7 +39,11 @@ export const Header: React.FC = () => {
   const pendingReviews = records.filter(r => r.status === 'VERIFICATION_PENDING').length;
 
   const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setUserRole(e.target.value as UserRole);
+    const nextRole = e.target.value as UserRole;
+    setUserRole(nextRole);
+    if (nextRole === 'CITIZEN') {
+      setActiveTab('CITIZEN_PORTAL');
+    }
   };
 
   const handleLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -128,35 +133,37 @@ export const Header: React.FC = () => {
         {/* Role Switcher, Language & Alert Actions */}
         <div className="flex items-center space-x-2.5">
           {/* Quick Stats Pill */}
-          <div className="hidden xl:flex items-center space-x-2 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 py-1 text-xs select-none">
-            <button
-              type="button"
-              onClick={() => {
-                const valRec = records.find(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS') || records[0];
-                if (valRec) setActiveRecordId(valRec.id);
-                setActiveTab('SPLIT_VERIFY');
-              }}
-              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline transition cursor-pointer"
-              title="Click to view validated record"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{records.filter(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS').length} {t('validatedCount')}</span>
-            </button>
-            <span className="text-slate-700">•</span>
-            <button
-              type="button"
-              onClick={() => {
-                const pendRec = records.find(r => r.status === 'VERIFICATION_PENDING') || records[0];
-                if (pendRec) setActiveRecordId(pendRec.id);
-                setActiveTab('SPLIT_VERIFY');
-              }}
-              className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline transition cursor-pointer"
-              title="Click to view pending verification record"
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{pendingReviews} {t('pendingCount')}</span>
-            </button>
-          </div>
+          {userRole !== 'CITIZEN' && activeTab !== 'CITIZEN_PORTAL' && (
+            <div className="hidden xl:flex items-center space-x-2 bg-slate-950/60 border border-slate-800 rounded-lg px-2.5 py-1 text-xs select-none">
+              <button
+                type="button"
+                onClick={() => {
+                  const valRec = records.find(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS') || records[0];
+                  if (valRec) setActiveRecordId(valRec.id);
+                  setActiveTab('SPLIT_VERIFY');
+                }}
+                className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 hover:underline transition cursor-pointer"
+                title="Click to view validated record"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{records.filter(r => r.status === 'APPROVED_TEHSILDAR' || r.status === 'SYNCED_LRMS').length} {t('validatedCount')}</span>
+              </button>
+              <span className="text-slate-700">•</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const pendRec = records.find(r => r.status === 'VERIFICATION_PENDING') || records[0];
+                  if (pendRec) setActiveRecordId(pendRec.id);
+                  setActiveTab('SPLIT_VERIFY');
+                }}
+                className="flex items-center gap-1 text-amber-400 hover:text-amber-300 hover:underline transition cursor-pointer"
+                title="Click to view pending verification record"
+              >
+                <AlertTriangle className="w-3.5 h-3.5" />
+                <span>{pendingReviews} {t('pendingCount')}</span>
+              </button>
+            </div>
+          )}
 
           {/* Multilingual Selector */}
           <div className="flex items-center bg-slate-800/80 border border-slate-700 rounded-lg px-2 py-1 text-xs">
@@ -216,18 +223,20 @@ export const Header: React.FC = () => {
           </button>
 
           {/* Quick Notifications Trigger */}
-          <button 
-            onClick={() => setActiveTab('SPLIT_VERIFY')}
-            className="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700"
-            title="Validation Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            {totalDisputes > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
-                {totalDisputes}
-              </span>
-            )}
-          </button>
+          {userRole !== 'CITIZEN' && activeTab !== 'CITIZEN_PORTAL' && (
+            <button 
+              onClick={() => setActiveTab('SPLIT_VERIFY')}
+              className="relative p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700"
+              title="Validation Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              {totalDisputes > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                  {totalDisputes}
+                </span>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
